@@ -38,7 +38,7 @@ class Summoner:
         :return: Summoner object
         """
         summoner = riot_watcher.account.by_puuid(puuid=puuid, region="americas")
-        return cls(lol_watcher=lol_watcher, puuid=puuid, game_name=summoner['gameName'], tag_line=summoner['tagline'],
+        return cls(lol_watcher=lol_watcher, puuid=puuid, game_name=summoner['gameName'], tag_line=summoner['tagLine'],
                    region=region)
 
     @classmethod
@@ -71,28 +71,28 @@ class Summoner:
         """
         return self.__lol_watcher.match.matchlist_by_puuid(puuid=self.__summoner_puuid, region=self.__region)
 
-    def get_summoner_puuid(self) -> str:
+    def puuid(self) -> str:
         """
         Returns the summoner's PUUID
         :return: summoner's PUUID
         """
         return self.__summoner_puuid
 
-    def get_summoner_name(self) -> str:
+    def summoner_name(self) -> str:
         """
         Returns the summoner's name
         :return: summoner's name
         """
         return self.__game_name
 
-    def get_summoner_tag_line(self) -> str:
+    def tag_line(self) -> str:
         """
         Returns the tag line of the summoner's account. Ex. NA1
         :return: tag line of summoner
         """
         return self.__tag_line
 
-    def get_region(self) -> str:
+    def region(self) -> str:
         """
         Returns the region/server summoner's account is on
         :return: summoner's region
