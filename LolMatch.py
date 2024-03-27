@@ -4,6 +4,7 @@ import pandas as pd
 
 def get_match_details(lol_watcher: LolWatcher, match_id: str, region: str) -> dict:
     """
+    Retrieves the specified match from the League API and returns a dictionary
     :param lol_watcher: LolWatcher instance to query for match details
     :param match_id: Match ID of game
     :param region: Region/server of player/match
