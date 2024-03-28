@@ -29,6 +29,7 @@ def hello_world():
             'tagline': tagline,
             'region': region,
             'summoner_level': player_info['summonerLevel'],
+            'player_icon': player_info['profileIconId']
         }
 
         return render_template('player_stats_template.html', html_payload=html_payload)
