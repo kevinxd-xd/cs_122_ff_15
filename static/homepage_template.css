@@ -1,0 +1,7 @@
+.banner_area h1 {
+    text-align: center;
+}
+.form_container {
+    display:flex;
+    justify-content: center;
+}

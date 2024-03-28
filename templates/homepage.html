@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LoLStats</title>
+    <link rel="stylesheet" href=".././static/homepage_template.css">
+</head>
+<body>
+    <div class="banner_area">
+        <h1>LoLStats</h1>
+    </div>
+    <div class="body">
+        <div class="form_container">
+            <form method="post" enctype="multipart/form-data">
+                <label>
+                    <select name="region">
+                        <option value="NA1">North America</option>
+                        <option value="EUW1">EU West</option>
+                        <option value="EUN1">EU North & East</option>
+                        <option value="JP1">Japan</option>
+                        <option value="KR">Korea</option>
+                        <option value="LA1">Latin America North</option>
+                        <option value="LA2">Latin America South</option>
+                        <option value="BR1">Brazil</option>
+                        <option value="OC1">Oceania</option>
+                        <option value="PH2">Philippines</option>
+                        <option value="RU">Russia</option>
+                        <option value="SG2">Singapore</option>
+                        <option value="TH2">Thailand</option>
+                        <option value="TR1">Turkey</option>
+                        <option value="TW2">Taiwan</option>
+                        <option value="VN2">Vietnam</option>
+                    </select>
+                </label>
+                <label> <input type="text" placeholder="Enter your summoner name" name="summoner_name"/> </label>
+                <label> <input type="text" placeholder="Enter your tag line (Ex. NA1)" name="tagline"/> </label>
+                <input type="submit" value="Search" />
+            </form>
+        </div>
+    </div>
+</body>
+</html>
