@@ -10,7 +10,7 @@
     </div>
     <div class="body">
         <div class="form_container">
-            <form method="post" enctype="multipart/form-data">
+            <form action="{{ url_for('user_form_handle') }}" method="get" enctype="multipart/form-data">
                 <label>
                     <select name="region">
                         <option value="NA1">North America</option>
@@ -31,8 +31,8 @@
                         <option value="VN2">Vietnam</option>
                     </select>
                 </label>
-                <label> <input type="text" placeholder="Enter your summoner name" name="summoner_name"/> </label>
-                <label> <input type="text" placeholder="Enter your tag line (Ex. NA1)" name="tagline"/> </label>
+                <label> <input type="text" placeholder="Enter your summoner name" name="summoner_name" required/> </label>
+                <label> <input type="text" placeholder="Enter your tag line (Ex. NA1)" name="tagline" required/> </label>
                 <input type="submit" value="Search" />
             </form>
         </div>

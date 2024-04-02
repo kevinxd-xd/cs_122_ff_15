@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>LoLStats</title>
 </head>
 <body>
     <h1>Player Recap</h1>
@@ -11,5 +11,6 @@
     <p>Tagline: {{ html_payload["tagline"] }}</p>
     <p>Region: {{ html_payload["region"] }}</p>
     <p>Summoner Level: {{ html_payload["summoner_level"] }}</p>
+    <a href={{ url_for('show_homepage') }}> <p>Return to the search page</p> </a>
 </body>
 </html>
