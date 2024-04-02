@@ -30,5 +30,5 @@ def get_match_info(match: dict) -> pd.DataFrame:
     :return: data from of general match details
     """
     df = pd.DataFrame.from_dict(match["info"])
-    df.drop(columns=["participants"])
+    df.drop(columns=["participants"], inplace=True)
     return df
