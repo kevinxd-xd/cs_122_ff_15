@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from markupsafe import escape
 import LolMatch
 from summoner import Summoner
+import constants
 
 # Load API key and other secrets from .env file
 load_dotenv()
@@ -19,7 +20,7 @@ league_api = LolWatcher(api_key=os.getenv("RIOT_API_KEY"))
 # Render the homepage upon entering the site
 @app.route('/', methods=['GET', 'POST'])
 def show_homepage():
-    return render_template('homepage.html')
+    return render_template('homepage.html', regions=constants.regions)
 
 
 # Base url, used to collect the parameters from url submission
@@ -40,7 +41,6 @@ def user_form_handle():
 # Brings up user stats using their in-game name, tagline, and region
 @app.route('/user/<region>/<summoner_name>-<tagline>', methods=['GET'])
 def user_search(summoner_name, tagline, region):
-
     # Try to query the Riot API for their player information
     try:
         player = Summoner.from_game_name(lol_watcher=league_api, riot_watcher=riot_api, game_name=summoner_name,
