@@ -31,15 +31,16 @@
             <div class="search-container">
                 <form class="row-l p-4" action="{{ url_for('user_form_handle') }}" enctype="multipart/form-data" method="get">
                     <label class="form-label col m-3"> Region
-                        <select class="form-select" name="region">
+                        <select class="form-select" name="region" required>
+                            <option value="">Choose a region</option>
                         {% for region_name, region_val in regions.items() %}
                             <option value="{{ region_val }}">{{ region_name }}</option>
                         {% endfor %}
                         </select>
                     </label>
-                    <label class="form-label col m-3"> Summoner Name<input class="form-control me-4" name="summoner_name" placeholder="Enter your summoner name" required type="text"/> </label>
-                    <label class="form-label col m-3"> Tagline<input class="form-control me-4" name="tagline" placeholder="Enter your tagline (Ex. NA1)" required type="text"/> </label>
-                    <input class="col" type="submit" value="Search"/>
+                    <label class="form-label col m-3"> Summoner Name<input class="form-control me-4" name="summoner_name" placeholder="Enter your summoner name" type="text" required/> </label>
+                    <label class="form-label col m-3"> Tagline<input class="form-control me-4" name="tagline" placeholder="Enter your tagline (Ex. NA1)" type="text" required/> </label>
+                    <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
             </div>
         </div>
