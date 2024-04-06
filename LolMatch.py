@@ -13,22 +13,22 @@ def get_match_details(lol_watcher: LolWatcher, match_id: str, region: str) -> di
     return lol_watcher.match.by_id(match_id=match_id, region=region)
 
 
-def get_match_stats(match: dict) -> pd.DataFrame:
+def get_player_stats(match: dict) -> pd.DataFrame:
     """
     Returns the stats of each player in the match
     :param match: dictionary/JSON of the entire match
     :return: dataframe of player stats
     """
     df = pd.DataFrame.from_dict(match["info"]["participants"])
-    df.set_index(keys=["riotIdGameName", "riotIdTagline", "puuid"], inplace=True)
+    df.set_index(keys=["puuid"], inplace=True)
     return df
 
 
-def get_match_info(match: dict) -> pd.DataFrame:
+def get_match_info(match: dict) -> pd.Series:
     """
     Returns information about the match like map, duration, timestamps, etc.
-    :return: data from of general match details
+    :return: Series with general match details
     """
-    df = pd.DataFrame.from_dict(match["info"])
-    df.drop(columns=["participants"], inplace=True)
+    df = pd.Series(match["info"])
+    df.drop(labels=["participants"], inplace=True)
     return df
