@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, render_template, redirect, url_for, request, abort
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 import os
@@ -7,6 +9,8 @@ import LolMatch
 from summoner import Summoner
 import constants
 
+import plotly.express as px
+import pandas as pd
 # Load API key and other secrets from .env file
 load_dotenv()
 
@@ -52,13 +56,18 @@ def user_search(summoner_name, tagline, region):
     except Exception as e:
         abort(404, 'Summoner could not be found. Please try again.')
 
+    graphs = []
+
+    # Create graphs with Plotly here
+
     # Collect all the info we collected to pass it to the player stats template
     html_payload = {
         'summoner_name': summoner_name,
         'tagline': tagline,
         'region': region,
         'summoner_level': player_info['summonerLevel'],
-        'player_icon': player_info['profileIconId']
+        'player_icon': player_info['profileIconId'],
+        'graphs': graphs
     }
 
     # Render the player stats and pass in the payload
