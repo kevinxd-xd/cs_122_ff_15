@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, render_template, redirect, url_for, request, abort
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 import os
@@ -5,7 +7,10 @@ from dotenv import load_dotenv
 from markupsafe import escape
 import LolMatch
 from summoner import Summoner
+import constants
 
+import plotly.express as px
+import pandas as pd
 # Load API key and other secrets from .env file
 load_dotenv()
 
@@ -19,7 +24,7 @@ league_api = LolWatcher(api_key=os.getenv("RIOT_API_KEY"))
 # Render the homepage upon entering the site
 @app.route('/', methods=['GET', 'POST'])
 def show_homepage():
-    return render_template('homepage.html')
+    return render_template('homepage.html', regions=constants.regions)
 
 
 # Base url, used to collect the parameters from url submission
@@ -40,7 +45,6 @@ def user_form_handle():
 # Brings up user stats using their in-game name, tagline, and region
 @app.route('/user/<region>/<summoner_name>-<tagline>', methods=['GET'])
 def user_search(summoner_name, tagline, region):
-
     # Try to query the Riot API for their player information
     try:
         player = Summoner.from_game_name(lol_watcher=league_api, riot_watcher=riot_api, game_name=summoner_name,
@@ -52,13 +56,18 @@ def user_search(summoner_name, tagline, region):
     except Exception as e:
         abort(404, 'Summoner could not be found. Please try again.')
 
+    graphs = []
+
+    # Create graphs with Plotly here
+
     # Collect all the info we collected to pass it to the player stats template
     html_payload = {
         'summoner_name': summoner_name,
         'tagline': tagline,
         'region': region,
         'summoner_level': player_info['summonerLevel'],
-        'player_icon': player_info['profileIconId']
+        'player_icon': player_info['profileIconId'],
+        'graphs': graphs
     }
 
     # Render the player stats and pass in the payload
