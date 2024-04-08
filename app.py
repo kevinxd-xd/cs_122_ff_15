@@ -61,14 +61,15 @@ def user_search(summoner_name, tagline, region):
     # Create graphs with Plotly here
 
     # Collect all the info we collected to pass it to the player stats template
+
     html_payload = {
         'summoner_name': summoner_name,
         'tagline': tagline,
         'region': region,
         'summoner_level': player_info['summonerLevel'],
         'player_icon': player_info['profileIconId'],
-        'graphs': graphs
-    }
+        'graphs': graphs,
+        'json_file': player_info}
 
     # Render the player stats and pass in the payload
     return render_template('player_stats_template.html', html_payload=html_payload)
