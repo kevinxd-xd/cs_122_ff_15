@@ -8,9 +8,12 @@ from markupsafe import escape
 import LolMatch
 from summoner import Summoner
 import constants
+import json
 
 import plotly.express as px
 import pandas as pd
+
+import time
 # Load API key and other secrets from .env file
 load_dotenv()
 
@@ -59,6 +62,52 @@ def user_search(summoner_name, tagline, region):
     graphs = []
 
     # Create graphs with Plotly here
+    match_ids = player.get_match_ids()  # list of most recent 20 match ids
+
+    '''Scatter Plot: Past 100 Game Duration'''
+    # Extract game times
+    date = []
+    durations = []
+    game_modes = []
+    game_modes_count = {}
+    for match_id in match_ids:
+        match_details = LolMatch.get_match_details(
+            lol_watcher=league_api, match_id=match_id, region=region)
+        match_details_pd = LolMatch.get_player_stats(match=match_details)
+        game_modes.append(match_details['info']['gameMode'])
+
+        match_info_pd = LolMatch.get_match_info(match=match_details)
+
+        date.append(match_info_pd['gameCreation'])
+
+        hr_min_sec = time.strftime("%H:%M:%S", time.gmtime(
+            match_info_pd['gameDuration']))
+        durations.append(hr_min_sec)
+    for mode in game_modes:
+        if mode in game_modes_count:
+            game_modes_count[mode] += 1
+        else:
+            game_modes_count[mode] = 1
+
+    print(f"Game distributions: {game_modes_count}")
+    dd_df = pd.DataFrame(data={'date': date, 'duration': durations})
+    # Convert all unix times to dates
+    # Timestamp error
+    # Source: https://stackoverflow.com/questions/37494983/python-fromtimestamp-oserror
+    dd_df['date'] = dd_df['date'].apply(
+        lambda ts: datetime.fromtimestamp(ts / 1000))
+
+    graph = px.scatter(data_frame=dd_df, x="date",
+                       y="duration", title="Duration of Past 20 Games")
+    graph_html = graph.to_html(full_html=False)
+    graphs.append(graph_html)
+
+    game_mode_df = pd.DataFrame({'Game Mode': game_modes_count.keys(),
+                                 'Count': game_modes_count.values()})
+    pie_graph = px.pie(data_frame=game_mode_df, values='Count', names="Game Mode",
+                       title="Game Mode Distribution")
+    graph_html = pie_graph.to_html(full_html=False)
+    graphs.append(graph_html)
 
     # Collect all the info we collected to pass it to the player stats template
 
@@ -69,14 +118,14 @@ def user_search(summoner_name, tagline, region):
         'summoner_level': player_info['summonerLevel'],
         'player_icon': player_info['profileIconId'],
         'graphs': graphs,
-        'json_file': player_info}
+        'json_file': json.dumps(player_info)}
 
     # Render the player stats and pass in the payload
     return render_template('player_stats_template.html', html_payload=html_payload)
 
 
 # Handles any 404 error raised
-@app.errorhandler(404)
+@ app.errorhandler(404)
 def page_404(error):
     # Renders the error template and passes the error message to display
     return render_template('error_page.html', error_msg=error)
