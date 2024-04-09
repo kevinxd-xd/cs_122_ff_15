@@ -1,5 +1,6 @@
 from riotwatcher import RiotWatcher, LolWatcher
 import constants
+import json
 
 
 class Summoner:
@@ -37,7 +38,8 @@ class Summoner:
         :param region: Region/server of the summoner
         :return: Summoner object
         """
-        summoner = riot_watcher.account.by_puuid(puuid=puuid, region="americas")
+        summoner = riot_watcher.account.by_puuid(
+            puuid=puuid, region="americas")
         return cls(lol_watcher=lol_watcher, puuid=puuid, game_name=summoner['gameName'], tag_line=summoner['tagLine'],
                    region=region)
 
@@ -53,7 +55,8 @@ class Summoner:
         :param region: Region/server of the summoner
         :return: Summoner object
         """
-        summoner = riot_watcher.account.by_riot_id(game_name=game_name, tag_line=tag_line, region="americas")
+        summoner = riot_watcher.account.by_riot_id(
+            game_name=game_name, tag_line=tag_line, region="americas")
         return cls(lol_watcher=lol_watcher, puuid=summoner['puuid'], game_name=game_name, tag_line=tag_line,
                    region=region)
 
@@ -98,3 +101,15 @@ class Summoner:
         :return: summoner's region
         """
         return self.__region
+
+    def export_json(self) -> json:
+        """
+        Returns a JSON representation of the summoner's account
+        :return: JSON file of basic summoner info
+        """
+        newdict = {}
+        newdict.update(self.get_summoner_info())
+        no_space = self.__game_name.replace(" ", "_")
+        file_str = f"./data/{no_space}_summoner_info.json"
+        with open(file_str, "w") as outfile:
+            json.dump(newdict, outfile)
