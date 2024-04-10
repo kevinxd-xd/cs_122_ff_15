@@ -56,12 +56,9 @@
 				<p>Tagline: {{ html_payload["tagline"] }}</p>
 				<p>Region: {{ html_payload["region"] }}</p>
 				<p>Summoner Level: {{ html_payload["summoner_level"] }}</p>
-				<button
-					class="btn btn-outline-success"
-					onclick="downloadProfileJSON()"
-				>
+				<a href="{{ html_payload["json_file"] }}" class="btn btn-primary" download>
 					Download Profile JSON
-				</button>
+				</a>
 			</div>
 		</div>
 
@@ -71,25 +68,5 @@
 			<div class="container-sm">{{ graph|safe }}</div>
 			{% endfor %}
 		</div>
-
-		<!-- This is where we download the profile JSON file -->
-		<script>
-			function downloadProfileJSON() {
-			    console.log("Download button clicked"); // Log message to console
-
-			    const jsonData = {{ html_payload['json_file'] }};
-			    const fileName = `${{ html_payload['summoner_name'] }}_summoner_info.json`;
-
-			    const jsonStr = JSON.stringify(jsonData);
-			    const blob = new Blob([jsonStr], {type: "application/json"});
-			    const url = URL.createObjectURL(blob);
-			    const a = document.createElement("a");
-			    a.href = url;
-			    a.download = fileName;
-			    document.body.appendChild(a);
-			    a.click();
-			    document.body.removeChild(a);
-			}
-		</script>
 	</body>
 </html>
