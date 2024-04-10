@@ -118,6 +118,9 @@ def user_search(summoner_name, tagline, region):
 
     # Collect all the info we collected to pass it to the player stats template
 
+    # Path to where the data is saved
+    json_file_path = ""
+
     html_payload = {
         'summoner_name': summoner_name,
         'tagline': tagline,
@@ -125,7 +128,8 @@ def user_search(summoner_name, tagline, region):
         'summoner_level': player_info['summonerLevel'],
         'player_icon': player_info['profileIconId'],
         'graphs': graphs,
-        'json_file': json.dumps(player_info)}
+        'json_file_path': json_file_path
+    }
 
     # Render the player stats and pass in the payload
     return render_template('player_stats_template.html', html_payload=html_payload)
