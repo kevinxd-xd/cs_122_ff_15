@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from flask import Flask, render_template, redirect, url_for, request, abort
@@ -53,8 +54,14 @@ def user_search(summoner_name, tagline, region):
     # Improve the error handling here
     # Handle API errors raised from RiotWatcher
     # Our own custom one as well
+    except ApiError as err:
+        # Convert error response to a dictionary that we can access
+        err_dct = json.loads(err.response.text)
+        status_code = err_dct['status']['status_code']
+        status_message = err_dct['status']['message']
+        return render_template("error_page.html", status_code=status_code, status_message=status_message)
     except Exception as e:
-        abort(404, 'Summoner could not be found. Please try again.')
+        abort(404, 'Something went wrong. Please try again')
 
     graphs = []
 
@@ -78,4 +85,4 @@ def user_search(summoner_name, tagline, region):
 @app.errorhandler(404)
 def page_404(error):
     # Renders the error template and passes the error message to display
-    return render_template('error_page.html', error_msg=error)
+    return render_template('error_page.html', status_code=404, status_message="Page not found")
