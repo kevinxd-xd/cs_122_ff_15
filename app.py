@@ -143,10 +143,14 @@ def json_submission():
     # How to convert byte string to actual string
     # Source: https://stackoverflow.com/questions/606191/convert-bytes-to-a-string-in-python-3
     convert_str = submission_data.read().decode('utf-8')
+    # Data is ready to be used
     player_data = json.loads(convert_str)
 
-    # Data is ready to be used
+    html_payload = {
 
+    }
+    # Render the player stats and pass in the payload
+    return render_template('player_stats_template.html', html_payload=html_payload)
 
 # Handles any 404 error raised
 @ app.errorhandler(404)
