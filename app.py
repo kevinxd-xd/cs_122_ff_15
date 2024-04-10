@@ -16,7 +16,7 @@ import pandas as pd
 
 import time
 # Load API key and other secrets from .env file
-load_dotenv()
+load_dotenv(override=True)
 
 app = Flask(__name__)
 
