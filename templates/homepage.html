@@ -47,9 +47,9 @@
                 </div>
                 <div class="upload-container card m-4">
                     <h5 class="card-header">Create analytics using JSON data (Test Case Input)</h5>
-                    <form class="row-l p-4 card-body" action="hold" enctype="multipart/form-data" method="post">
+                    <form class="row-l p-4 card-body" action="{{ url_for('json_submission') }}" enctype="multipart/form-data" method="post">
                         <label for="summoner-stats-upload" class="form-label">Upload Test Cases Here</label>
-                        <input class="form-control" type="file" id="summoner-stats-upload" multiple required>
+                        <input class="form-control" type="file" id="summoner-stats-upload" name="json_upload" multiple required>
                         <button class="btn btn-outline-success mt-3" type="submit">Submit</button>
                     </form>
                 </div>

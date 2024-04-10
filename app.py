@@ -134,6 +134,19 @@ def user_search(summoner_name, tagline, region):
     # Render the player stats and pass in the payload
     return render_template('player_stats_template.html', html_payload=html_payload)
 
+@app.route('/json_submission', methods=['POST'])
+def json_submission():
+    submission_data = request.files['json_upload']
+    # If the file type is not of JSON type then we render an error page
+    if submission_data.mimetype != 'application/json':
+        return render_template("error_page.html", status_code=400, status_message="Not a JSON file!")
+    # How to convert byte string to actual string
+    # Source: https://stackoverflow.com/questions/606191/convert-bytes-to-a-string-in-python-3
+    convert_str = submission_data.read().decode('utf-8')
+    player_data = json.loads(convert_str)
+
+    # Data is ready to be used
+
 
 # Handles any 404 error raised
 @ app.errorhandler(404)
