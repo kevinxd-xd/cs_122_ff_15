@@ -12,6 +12,7 @@ from markupsafe import escape
 import LolMatch
 from summoner import Summoner
 import constants
+import GraphGeneration
 
 # Load API key and other secrets from .env file
 load_dotenv(override=True)
@@ -64,62 +65,16 @@ def user_search(summoner_name, tagline, region):
     except Exception as e:
         abort(404, 'Something went wrong. Please try again')
 
-    graphs = []
-
-    # Create graphs with Plotly here
     match_ids = player.get_match_ids()  # list of most recent 20 match ids
-
-    '''Scatter Plot: Past 100 Game Duration'''
-    # Extract game times
-    date = []
-    durations = []
-    game_modes = []
-    game_modes_count = {}
-    for match_id in match_ids:
-        match_details = LolMatch.get_match_details(
-            lol_watcher=league_api, match_id=match_id, region=region)
-        match_details_pd = LolMatch.get_player_stats(match=match_details)
-        game_modes.append(match_details['info']['gameMode'])
-
-        match_info_pd = LolMatch.get_match_info(match=match_details)
-
-        date.append(match_info_pd['gameCreation'])
-
-        hr_min_sec = time.strftime("%H:%M:%S", time.gmtime(
-            match_info_pd['gameDuration']))
-        durations.append(hr_min_sec)
-    for mode in game_modes:
-        if mode in game_modes_count:
-            game_modes_count[mode] += 1
-        else:
-            game_modes_count[mode] = 1
-
-    dd_df = pd.DataFrame(data={'date': date, 'duration': durations})
-    # Convert all unix times to dates
-    # Timestamp error
-    # Source: https://stackoverflow.com/questions/37494983/python-fromtimestamp-oserror
-    dd_df['date'] = dd_df['date'].apply(
-        lambda ts: datetime.fromtimestamp(ts / 1000))
-
-    graph = px.scatter(data_frame=dd_df, x="date",
-                       y="duration", title="Duration of Past 20 Games")
-    graph_html = graph.to_html(full_html=False)
-    graphs.append(graph_html)
-
-    game_mode_df = pd.DataFrame({'Game Mode': game_modes_count.keys(),
-                                 'Count': game_modes_count.values()})
-    pie_graph = px.pie(data_frame=game_mode_df, values='Count', names="Game Mode",
-                       title="Game Mode Distribution")
-    graph_html = pie_graph.to_html(full_html=False)
-    graphs.append(graph_html)
 
     # Collect all the info we collected to pass it to the player stats template
 
     # Path to where the data is saved
-    # TODO: PATH URL EX) ./data/puuid/summoner.json
     player.export_json(matches=match_ids, league_api=league_api)
     json_file_path = f"./data/{player.puuid()}/summoner.json"
 
+    player_data = GraphGeneration.load_file(json_file_path)
+    graphs = GraphGeneration.createGraphs(player_data)
     html_payload = {
         'summoner_name': summoner_name,
         'tagline': tagline,
@@ -142,55 +97,12 @@ def json_submission():
         return render_template("error_page.html", status_code=400, status_message="Not a JSON file!")
 
     # Data is ready to be used
-
     player_data = json.load(submission_data)
-
-    graphs = []
-    match_ids = list(player_data.keys())[1:]
-    '''Scatter Plot: Past 100 Game Duration'''
-    # Extract game times
-    date = []
-    durations = []
-    game_modes = []
-    game_modes_count = {}
-    for match_id in match_ids:
-        game_modes.append(player_data[match_id]['info']['gameMode'])
-        match_info_pd = pd.Series(player_data[match_id])
-
-        date.append(match_info_pd['info']['gameCreation'])
-
-        hr_min_sec = time.strftime("%H:%M:%S", time.gmtime(
-            match_info_pd['info']['gameDuration']))
-        durations.append(hr_min_sec)
-    for mode in game_modes:
-        if mode in game_modes_count:
-            game_modes_count[mode] += 1
-        else:
-            game_modes_count[mode] = 1
-
-    dd_df = pd.DataFrame(data={'date': date, 'duration': durations})
-    # Convert all unix times to dates
-    # Timestamp error
-    # Source: https://stackoverflow.com/questions/37494983/python-fromtimestamp-oserror
-    dd_df['date'] = dd_df['date'].apply(
-        lambda ts: datetime.fromtimestamp(ts / 1000))
-
-    graph = px.scatter(data_frame=dd_df, x="date",
-                       y="duration", title="Duration of Past 20 Games")
-    graph_html = graph.to_html(full_html=False)
-    graphs.append(graph_html)
-
-    game_mode_df = pd.DataFrame({'Game Mode': game_modes_count.keys(),
-                                 'Count': game_modes_count.values()})
-    pie_graph = px.pie(data_frame=game_mode_df, values='Count', names="Game Mode",
-                       title="Game Mode Distribution")
-    graph_html = pie_graph.to_html(full_html=False)
-    graphs.append(graph_html)
+    graphs = GraphGeneration.createGraphs(player_data)
 
     puuid = player_data['summonerInfo']['puuid']
     json_file_path = f"./data/{puuid}/summoner.json"
     html_payload = {
-        # TODO: PARSE THROUGH player_data TO LOAD INFO
         'summoner_name': player_data['summonerInfo']['summoner_name'],
         'tag_line': player_data['summonerInfo']['tagline'],
         'region': player_data['summonerInfo']['region'],
