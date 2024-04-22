@@ -118,7 +118,6 @@ def user_search(summoner_name, tagline, region):
 
     # Path to where the data is saved
     # TODO: PATH URL EX) ./data/puuid/summoner.json
-    print(f"IN app.py\nAdding {player.summoner_name} to data folder")
     Summoner.export_json(self=player, matches=match_ids,
                          league_api=league_api,
                          region=region)
@@ -144,11 +143,10 @@ def json_submission():
     # If the file type is not of JSON type then we render an error page
     if submission_data.mimetype != 'application/json':
         return render_template("error_page.html", status_code=400, status_message="Not a JSON file!")
-    # How to convert byte string to actual string
-    # Source: https://stackoverflow.com/questions/606191/convert-bytes-to-a-string-in-python-3
-    convert_str = submission_data.read().decode('utf-8')
+
     # Data is ready to be used
-    player_data = json.load(convert_str)
+
+    player_data = json.load(submission_data)
 
     graphs = []
     match_ids = list(player_data.keys())[1:]
@@ -159,13 +157,13 @@ def json_submission():
     game_modes = []
     game_modes_count = {}
     for match_id in match_ids:
-        game_modes.append(player_data['match_id']['info']['gameMode'])
+        game_modes.append(player_data[match_id]['info']['gameMode'])
         match_info_pd = pd.Series(player_data[match_id])
 
         date.append(match_info_pd['info']['gameCreation'])
 
         hr_min_sec = time.strftime("%H:%M:%S", time.gmtime(
-            match_info_pd['gameDuration']))
+            match_info_pd['info']['gameDuration']))
         durations.append(hr_min_sec)
     for mode in game_modes:
         if mode in game_modes_count:
@@ -173,7 +171,6 @@ def json_submission():
         else:
             game_modes_count[mode] = 1
 
-    print(f"Game distributions: {game_modes_count}")
     dd_df = pd.DataFrame(data={'date': date, 'duration': durations})
     # Convert all unix times to dates
     # Timestamp error
