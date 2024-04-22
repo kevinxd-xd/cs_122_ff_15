@@ -104,17 +104,12 @@ class Summoner:
         """
         return self.__region
 
-    def export_json(self, matches: list, league_api: str, region: str) -> json:
+    def export_json(self, matches: list, league_api: str):
         """
-        Returns a JSON representation of the summoner's account
-        :return: JSON file of basic summoner info
+        Creates a JSON representation of the summoner's account
+        :param matches: list of recent 20 match ids
+        :param league_api: str of the RIOT API key
         """
-        # newdict = {}
-        # newdict.update(self.get_summoner_info())
-        # no_space = self.__game_name.replace(" ", "_")
-        # file_str = f"./data/{no_space}_summoner_info.json"
-        # with open(file_str, "w") as outfile:
-        #     json.dump(newdict, outfile)
         json_file = {}  # dictionary to convert to json file. Key is match_id. Value is participant match info
 
         # adds summoner info to json file
@@ -125,7 +120,7 @@ class Summoner:
 
         for match in matches:
             json_file[match] = LolMatch.get_match_details(
-                lol_watcher=league_api, match_id=match, region=region)  # dict
+                lol_watcher=league_api, match_id=match, region=self.region())  # dict
 
             for i, participant in enumerate(json_file[match]['metadata']['participants']):
                 # Finds the index of summoner to filter for summoner's match information
