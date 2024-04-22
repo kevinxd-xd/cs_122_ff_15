@@ -94,7 +94,6 @@ def user_search(summoner_name, tagline, region):
         else:
             game_modes_count[mode] = 1
 
-    print(f"Game distributions: {game_modes_count}")
     dd_df = pd.DataFrame(data={'date': date, 'duration': durations})
     # Convert all unix times to dates
     # Timestamp error
@@ -118,9 +117,7 @@ def user_search(summoner_name, tagline, region):
 
     # Path to where the data is saved
     # TODO: PATH URL EX) ./data/puuid/summoner.json
-    Summoner.export_json(self=player, matches=match_ids,
-                         league_api=league_api,
-                         region=region)
+    player.export_json(matches=match_ids, league_api=league_api)
     json_file_path = f"./data/{player.puuid()}/summoner.json"
 
     html_payload = {
