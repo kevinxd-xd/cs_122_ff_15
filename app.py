@@ -118,6 +118,10 @@ def user_search(summoner_name, tagline, region):
 
     # Path to where the data is saved
     # TODO: PATH URL EX) ./data/puuid/summoner.json
+    print(f"IN app.py\nAdding {player.summoner_name} to data folder")
+    Summoner.export_json(self=player, matches=match_ids,
+                         league_api=league_api,
+                         region=region)
     json_file_path = f"./data/{player.puuid()}/summoner.json"
 
     html_payload = {
