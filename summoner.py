@@ -1,6 +1,8 @@
+import os
+import json
 from riotwatcher import RiotWatcher, LolWatcher
 import constants
-import json
+import LolMatch
 
 
 class Summoner:
@@ -102,14 +104,38 @@ class Summoner:
         """
         return self.__region
 
-    def export_json(self) -> json:
+    def export_json(self, matches: list, league_api: str, region: str) -> json:
         """
         Returns a JSON representation of the summoner's account
         :return: JSON file of basic summoner info
         """
-        newdict = {}
-        newdict.update(self.get_summoner_info())
-        no_space = self.__game_name.replace(" ", "_")
-        file_str = f"./data/{no_space}_summoner_info.json"
-        with open(file_str, "w") as outfile:
-            json.dump(newdict, outfile)
+        # newdict = {}
+        # newdict.update(self.get_summoner_info())
+        # no_space = self.__game_name.replace(" ", "_")
+        # file_str = f"./data/{no_space}_summoner_info.json"
+        # with open(file_str, "w") as outfile:
+        #     json.dump(newdict, outfile)
+        json_file = {}  # dictionary to convert to json file. Key is match_id. Value is participant match info
+
+        # adds summoner info to json file
+        json_file['summonerInfo'] = self.get_summoner_info()
+        json_file['summonerInfo']['summoner_name'] = self.summoner_name()
+        json_file['summonerInfo']['tagline'] = self.tag_line()
+        json_file['summonerInfo']['region'] = self.region()
+
+        for match in matches:
+            json_file[match] = LolMatch.get_match_details(
+                lol_watcher=league_api, match_id=match, region=region)  # dict
+
+            for i, participant in enumerate(json_file[match]['metadata']['participants']):
+                # Finds the index of summoner to filter for summoner's match information
+                if participant == self.puuid():
+                    index = i
+
+            summoner_match_info = json_file[match]['info']['participants'][index]
+            json_file[match]['info']['participants'] = summoner_match_info
+
+        if not os.path.exists(f'./data/{self.puuid()}'):
+            os.makedirs(f'./data/{self.puuid()}')
+        with open(f'./data/{self.puuid()}/summoner.json', 'w') as fo:
+            json.dump(json_file, fo)  # converts dict to json
