@@ -1,16 +1,10 @@
 import json
-from datetime import datetime
-import time
 import os
-import plotly.express as px
-import pandas as pd
-
 from flask import Flask, render_template, redirect, url_for, request, abort, send_from_directory
 from werkzeug import security
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 from dotenv import load_dotenv
 from markupsafe import escape
-import LolMatch
 from summoner import Summoner
 import constants
 import GraphGeneration
@@ -21,6 +15,8 @@ load_dotenv(override=True)
 app = Flask(__name__)
 # Config for serving JSON files safely
 app.config['DATA'] = os.path.join(app.root_path, "data")
+# Graphs to generate
+app.config['GRAPHS'] = [GraphGeneration.create_duration_graph, GraphGeneration.graphs_gamemodes_dist]
 
 # Create an instance of Riot and LoL watcher to pass around
 riot_api = RiotWatcher(api_key=os.getenv("RIOT_API_KEY"))
@@ -28,7 +24,7 @@ league_api = LolWatcher(api_key=os.getenv("RIOT_API_KEY"))
 
 
 # Render the homepage upon entering the site
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def show_homepage():
     return render_template('homepage.html', regions=constants.regions)
 
@@ -74,10 +70,10 @@ def user_search(summoner_name, tagline, region):
 
     # Path to where the data is saved
     player.export_json(matches=match_ids, league_api=league_api)
-    json_file_path = f"./data/{player.puuid()}/summoner.json"
+    json_file_path = os.path.join(app.config['DATA'], player.puuid(), "summoner.json")
 
     player_data = GraphGeneration.load_file(json_file_path)
-    graphs = GraphGeneration.createGraphs(player_data)
+    graphs = GraphGeneration.create_graphs(player_data, app.config['GRAPHS'])
     html_payload = {
         'summoner_name': summoner_name,
         'tagline': tagline,
@@ -86,7 +82,6 @@ def user_search(summoner_name, tagline, region):
         'player_icon': player_info['profileIconId'],
         'puuid': player_info['puuid'],
         'graphs': graphs,
-        'json_file_path': json_file_path
     }
 
     # Render the player stats and pass in the payload
@@ -102,10 +97,8 @@ def json_submission():
 
     # Data is ready to be used
     player_data = json.load(submission_data)
-    graphs = GraphGeneration.createGraphs(player_data)
+    graphs = GraphGeneration.create_graphs(player_data, app.config["GRAPHS"])
 
-    puuid = player_data['summonerInfo']['puuid']
-    json_file_path = f"./data/{puuid}/summoner.json"
     html_payload = {
         'summoner_name': player_data['summonerInfo']['summoner_name'],
         'tag_line': player_data['summonerInfo']['tagline'],
@@ -113,12 +106,9 @@ def json_submission():
         'summoner_level': player_data['summonerInfo']['summonerLevel'],
         'player_icon': player_data['summonerInfo']['profileIconId'],
         'graphs': graphs,
-        'json_file_path': json_file_path
     }
     # Render the player stats and pass in the payload
     return render_template('player_stats_template.html', html_payload=html_payload)
-
-# Handles any 404 error raised
 
 # How to send a file from directory to user
 # Source: https://stackoverflow.com/questions/24577349/flask-download-a-file
