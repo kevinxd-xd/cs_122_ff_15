@@ -5,7 +5,8 @@ import os
 import plotly.express as px
 import pandas as pd
 
-from flask import Flask, render_template, redirect, url_for, request, abort
+from flask import Flask, render_template, redirect, url_for, request, abort, send_from_directory
+from werkzeug import security
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
 from dotenv import load_dotenv
 from markupsafe import escape
@@ -17,6 +18,8 @@ import constants
 load_dotenv(override=True)
 
 app = Flask(__name__)
+# Config for serving JSON files safely
+app.config['DATA'] = os.path.join(app.root_path, "data")
 
 # Create an instance of Riot and LoL watcher to pass around
 riot_api = RiotWatcher(api_key=os.getenv("RIOT_API_KEY"))
@@ -126,6 +129,7 @@ def user_search(summoner_name, tagline, region):
         'region': region,
         'summoner_level': player_info['summonerLevel'],
         'player_icon': player_info['profileIconId'],
+        'puuid': player_info['puuid'],
         'graphs': graphs,
         'json_file_path': json_file_path
     }
@@ -204,8 +208,17 @@ def json_submission():
 
 # Handles any 404 error raised
 
+# How to send a file from directory to user
+# Source: https://stackoverflow.com/questions/24577349/flask-download-a-file
+@app.route('/download/<puuid>', methods=['GET'])
+def download(puuid):
+    file_path = security.safe_join(app.config['DATA'], puuid)
+    if os.path.exists(file_path):
+        return send_from_directory(directory=app.config['DATA'], path=security.safe_join(puuid, "summoner.json"))
+    else:
+        return render_template('error_page.html', status_code=404, status_message="File not found")
 
-@ app.errorhandler(404)
+@app.errorhandler(404)
 def page_404(error):
     # Renders the error template and passes the error message to display
     return render_template('error_page.html', status_code=404, status_message="Page not found")
