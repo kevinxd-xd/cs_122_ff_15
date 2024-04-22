@@ -1,20 +1,18 @@
 import json
 from datetime import datetime
+import time
+import os
+import plotly.express as px
+import pandas as pd
 
 from flask import Flask, render_template, redirect, url_for, request, abort
 from riotwatcher import LolWatcher, RiotWatcher, ApiError
-import os
 from dotenv import load_dotenv
 from markupsafe import escape
 import LolMatch
 from summoner import Summoner
 import constants
-import json
 
-import plotly.express as px
-import pandas as pd
-
-import time
 # Load API key and other secrets from .env file
 load_dotenv(override=True)
 
@@ -119,7 +117,8 @@ def user_search(summoner_name, tagline, region):
     # Collect all the info we collected to pass it to the player stats template
 
     # Path to where the data is saved
-    json_file_path = "" # TODO: PATH URL EX) ./data/puuid/summoner.json
+    # TODO: PATH URL EX) ./data/puuid/summoner.json
+    json_file_path = f"./data/{player.puuid()}/summoner.json"
 
     html_payload = {
         'summoner_name': summoner_name,
@@ -128,11 +127,12 @@ def user_search(summoner_name, tagline, region):
         'summoner_level': player_info['summonerLevel'],
         'player_icon': player_info['profileIconId'],
         'graphs': graphs,
-        'json_file_path': json_file_path 
+        'json_file_path': json_file_path
     }
 
     # Render the player stats and pass in the payload
     return render_template('player_stats_template.html', html_payload=html_payload)
+
 
 @app.route('/json_submission', methods=['POST'])
 def json_submission():
@@ -144,15 +144,69 @@ def json_submission():
     # Source: https://stackoverflow.com/questions/606191/convert-bytes-to-a-string-in-python-3
     convert_str = submission_data.read().decode('utf-8')
     # Data is ready to be used
-    player_data = json.loads(convert_str)
+    player_data = json.load(convert_str)
 
+    graphs = []
+    match_ids = list(player_data.keys())[1:]
+    '''Scatter Plot: Past 100 Game Duration'''
+    # Extract game times
+    date = []
+    durations = []
+    game_modes = []
+    game_modes_count = {}
+    for match_id in match_ids:
+        game_modes.append(player_data['match_id']['info']['gameMode'])
+        match_info_pd = pd.Series(player_data[match_id])
+
+        date.append(match_info_pd['info']['gameCreation'])
+
+        hr_min_sec = time.strftime("%H:%M:%S", time.gmtime(
+            match_info_pd['gameDuration']))
+        durations.append(hr_min_sec)
+    for mode in game_modes:
+        if mode in game_modes_count:
+            game_modes_count[mode] += 1
+        else:
+            game_modes_count[mode] = 1
+
+    print(f"Game distributions: {game_modes_count}")
+    dd_df = pd.DataFrame(data={'date': date, 'duration': durations})
+    # Convert all unix times to dates
+    # Timestamp error
+    # Source: https://stackoverflow.com/questions/37494983/python-fromtimestamp-oserror
+    dd_df['date'] = dd_df['date'].apply(
+        lambda ts: datetime.fromtimestamp(ts / 1000))
+
+    graph = px.scatter(data_frame=dd_df, x="date",
+                       y="duration", title="Duration of Past 20 Games")
+    graph_html = graph.to_html(full_html=False)
+    graphs.append(graph_html)
+
+    game_mode_df = pd.DataFrame({'Game Mode': game_modes_count.keys(),
+                                 'Count': game_modes_count.values()})
+    pie_graph = px.pie(data_frame=game_mode_df, values='Count', names="Game Mode",
+                       title="Game Mode Distribution")
+    graph_html = pie_graph.to_html(full_html=False)
+    graphs.append(graph_html)
+
+    puuid = player_data['summonerInfo']['puuid']
+    json_file_path = f"./data/{puuid}/summoner.json"
     html_payload = {
-        # TODO: PARSE THROUGH player_data TO LOAD INFO 
+        # TODO: PARSE THROUGH player_data TO LOAD INFO
+        'summoner_name': player_data['summonerInfo']['summoner_name'],
+        'tag_line': player_data['summonerInfo']['tagline'],
+        'region': player_data['summonerInfo']['region'],
+        'summoner_level': player_data['summonerInfo']['summonerLevel'],
+        'player_icon': player_data['summonerInfo']['profileIconId'],
+        'graphs': graphs,
+        'json_file_path': json_file_path
     }
     # Render the player stats and pass in the payload
     return render_template('player_stats_template.html', html_payload=html_payload)
 
 # Handles any 404 error raised
+
+
 @ app.errorhandler(404)
 def page_404(error):
     # Renders the error template and passes the error message to display
