@@ -104,9 +104,10 @@ class Summoner:
         """
         return self.__region
 
-    def export_json(self, matches: list, league_api: str):
+    def export_json(self, matches: list, data_directory: str, league_api: LolWatcher):
         """
         Creates a JSON representation of the summoner's account
+        :param data_directory: directory of where all player data is stored
         :param matches: list of recent 20 match ids
         :param league_api: str of the RIOT API key
         """
@@ -130,7 +131,8 @@ class Summoner:
             summoner_match_info = json_file[match]['info']['participants'][index]
             json_file[match]['info']['participants'] = summoner_match_info
 
-        if not os.path.exists(f'./data/{self.puuid()}'):
-            os.makedirs(f'./data/{self.puuid()}')
-        with open(f'./data/{self.puuid()}/summoner.json', 'w') as fo:
+        user_directory = os.path.join(data_directory, self.puuid())
+        if not os.path.exists(user_directory):
+            os.makedirs(user_directory)
+        with open(os.path.join(user_directory, 'summoner.json'), 'w') as fo:
             json.dump(json_file, fo)  # converts dict to json

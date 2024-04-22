@@ -69,7 +69,7 @@ def user_search(summoner_name, tagline, region):
     # Collect all the info we collected to pass it to the player stats template
 
     # Path to where the data is saved
-    player.export_json(matches=match_ids, league_api=league_api)
+    player.export_json(matches=match_ids, data_directory=app.config['DATA'], league_api=league_api)
     json_file_path = os.path.join(app.config['DATA'], player.puuid(), "summoner.json")
 
     player_data = GraphGeneration.load_file(json_file_path)
