@@ -1,5 +1,4 @@
-from datetime import datetime
-import time
+from datetime import datetime, time, timedelta
 import json
 import pandas as pd
 import plotly.express as px
@@ -42,8 +41,7 @@ def create_duration_graph(player_data: dict) -> str:
 
         date.append(match_info_pd['info']['gameCreation'])
 
-        hr_min_sec = time.strftime("%H:%M:%S", time.gmtime(
-            match_info_pd['info']['gameDuration']))
+        hr_min_sec = timedelta(seconds=match_info_pd['info']['gameDuration'])
         durations.append(hr_min_sec)
 
     dd_df = pd.DataFrame(data={'date': date, 'duration': durations})
@@ -53,8 +51,15 @@ def create_duration_graph(player_data: dict) -> str:
     dd_df['date'] = dd_df['date'].apply(
         lambda ts: datetime.fromtimestamp(ts / 1000))
 
+    # How to fix timedelta formatting issue, plotly doesn't support timedelta, workaround listed in Github issue
+    # Source 1: https://community.plotly.com/t/timeseries-plot-with-timedelta-axis/23560
+    # Source 2: https://github.com/plotly/plotly.py/issues/801
+    dd_df['duration'] = dd_df['duration'] + pd.to_datetime('1970/01/01')
+
     graph = px.scatter(data_frame=dd_df, x="date",
                        y="duration", title="Duration of Past 20 Games")
+    # Force format to ignore the workaround added
+    graph.update_yaxes(tickformat="%H:%M:%S")
     graph_html = graph.to_html(full_html=False)
 
     return graph_html

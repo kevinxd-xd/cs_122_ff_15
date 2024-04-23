@@ -56,9 +56,11 @@
 				<p>Tagline: {{ html_payload["tagline"] }}</p>
 				<p>Region: {{ html_payload["region"] }}</p>
 				<p>Summoner Level: {{ html_payload["summoner_level"] }}</p>
+				{% if html_payload["puuid"] %}
 				<a href="{{ url_for('download', puuid=html_payload["puuid"]) }}" class="btn btn-primary" download>
 					Download Profile JSON
 				</a>
+				{% endif %}
 			</div>
 		</div>
 
