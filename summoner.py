@@ -120,16 +120,19 @@ class Summoner:
         json_file['summonerInfo']['region'] = self.region()
 
         for match in matches:
-            json_file[match] = LolMatch.get_match_details(
-                lol_watcher=league_api, match_id=match, region=self.region())  # dict
+            try:
+                json_file[match] = LolMatch.get_match_details(
+                    lol_watcher=league_api, match_id=match, region=self.region())  # dict
 
-            for i, participant in enumerate(json_file[match]['metadata']['participants']):
-                # Finds the index of summoner to filter for summoner's match information
-                if participant == self.puuid():
-                    index = i
+                for i, participant in enumerate(json_file[match]['metadata']['participants']):
+                    # Finds the index of summoner to filter for summoner's match information
+                    if participant == self.puuid():
+                        index = i
 
-            summoner_match_info = json_file[match]['info']['participants'][index]
-            json_file[match]['info']['participants'] = summoner_match_info
+                summoner_match_info = json_file[match]['info']['participants'][index]
+                json_file[match]['info']['participants'] = summoner_match_info
+            except:
+                print(f"Game Info {match} not found")
 
         user_directory = os.path.join(data_directory, self.puuid())
         if not os.path.exists(user_directory):
