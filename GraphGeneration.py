@@ -17,7 +17,8 @@ def load_file(file_path: str) -> dict:
 
 
 def create_graphs(player_data, graph_funcs) -> list:
-    """Returns a list of graphs to be displayed
+    """
+    Returns a list of graphs to be displayed
     :param player_data: A dictionary from a JSON file containing player information
     :returns: A list of html graphs
     """
@@ -31,10 +32,8 @@ def create_graphs(player_data, graph_funcs) -> list:
 def create_duration_graph(player_data: dict) -> str:
     # Scatter Plot: Past 20 Game Duration
 
-    # Extract game times
     graphs = []
     match_ids = list(player_data.keys())[1:]
-    '''Scatter Plot: Past 20 Game Duration'''
     # Extract game times
     date = []
     durations = []
@@ -83,3 +82,23 @@ def graphs_gamemodes_dist(player_data: dict) -> str:
 
     return graph_html
 
+
+def win_loss_ratio(player_data: dict) -> str:
+    # player_data['info']['participants']['win'] # boolean
+    pass
+
+
+def abilities_used(player_data: dict) -> str:
+    # player_data['info'][participants']['challenges']['abilityUses']  # int
+    pass
+
+
+def longest_time_alive(player_data: dict) -> str:
+    # player_data['info'][participants']['longestTimeSpentLiving'] # int (seconds)
+    pass
+
+
+def skillshots_hit_v_abilities(player_data: dict) -> str:
+    # player_data['info'][participants']['challenges']['abilityUses']
+    # player_data['info'][participants']['challenges']['skillshotsDodged']
+    pass
