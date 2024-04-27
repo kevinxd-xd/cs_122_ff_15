@@ -50,14 +50,14 @@ def create_duration_graph(player_data: dict) -> str:
     # Timestamp error
     # Source: https://stackoverflow.com/questions/37494983/python-fromtimestamp-oserror
     dd_df['date'] = dd_df['date'].apply(
-        lambda ts: datetime.fromtimestamp(ts / 1000))
+        lambda ts: datetime.fromtimestamp(ts / 1000).date())
 
     # How to fix timedelta formatting issue, plotly doesn't support timedelta, workaround listed in Github issue
     # Source 1: https://community.plotly.com/t/timeseries-plot-with-timedelta-axis/23560
     # Source 2: https://github.com/plotly/plotly.py/issues/801
     dd_df['duration'] = dd_df['duration'] + pd.to_datetime('1970/01/01')
 
-    graph = px.scatter(data_frame=dd_df, x="date",
+    graph = px.box(data_frame=dd_df, x="date",
                        y="duration", title="Duration of Past 20 Games")
     # Force format to ignore the workaround added
     graph.update_yaxes(tickformat="%H:%M:%S")
@@ -84,6 +84,43 @@ def graphs_gamemodes_dist(player_data: dict) -> str:
                                  'Count': game_modes_count.values()})
     pie_graph = px.pie(data_frame=game_mode_df, values='Count', names="Game Mode",
                        title="Game Mode Distribution")
+    graph_html = pie_graph.to_html(full_html=False)
+
+    return graph_html
+
+
+def graphs_surrender_dist(player_data: dict) -> str:
+    match_ids = list(player_data.keys())[1:]
+    # Set up counts
+    result_counts = {
+        "win": 0,
+        "gameEndedInSurrender": 0,
+        "gameEndedInEarlySurrender": 0,
+        "loss": 0
+    }
+
+    for match_id in match_ids:
+        win = player_data[match_id]['info']['participants']['win']
+        surrender = player_data[match_id]['info']['participants']['gameEndedInSurrender']
+        surrender_early = player_data[match_id]['info']['participants']['gameEndedInEarlySurrender']
+
+        if win:
+            result_counts['win'] += 1
+        elif surrender and not surrender_early:
+            result_counts['gameEndedInSurrender'] += 1
+        elif not surrender and not surrender_early:
+            result_counts['loss'] += 1
+        else:
+            result_counts['gameEndedInEarlySurrender'] += 1
+
+    win_loss_data = pd.DataFrame({'Results': result_counts.keys(),
+                                  'Count': result_counts.values()})
+
+    pie_graph = px.pie(data_frame=win_loss_data, values='Count', names="Results",
+                       title="Win/Surrender/Loss Distribution",
+                       color_discrete_sequence=["green", "purple", "blue", "red"],
+                       category_orders={
+                           "Results": ["win", "gameEndedInSurrender", "gameEndedInEarlySurrender", "loss"]})
     graph_html = pie_graph.to_html(full_html=False)
 
     return graph_html

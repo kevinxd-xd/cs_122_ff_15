@@ -16,7 +16,8 @@ app = Flask(__name__)
 # Config for serving JSON files safely
 app.config['DATA'] = os.path.join(app.root_path, "data")
 # Graphs to generate
-app.config['GRAPHS'] = [GraphGeneration.create_duration_graph, GraphGeneration.graphs_gamemodes_dist]
+app.config['GRAPHS'] = [GraphGeneration.create_duration_graph, GraphGeneration.graphs_gamemodes_dist,
+                        GraphGeneration.graphs_surrender_dist]
 
 # Create an instance of Riot and LoL watcher to pass around
 riot_api = RiotWatcher(api_key=os.getenv("RIOT_API_KEY"))
@@ -101,7 +102,7 @@ def json_submission():
 
     html_payload = {
         'summoner_name': player_data['summonerInfo']['summoner_name'],
-        'tag_line': player_data['summonerInfo']['tagline'],
+        'tagline': player_data['summonerInfo']['tagline'],
         'region': player_data['summonerInfo']['region'],
         'summoner_level': player_data['summonerInfo']['summonerLevel'],
         'player_icon': player_data['summonerInfo']['profileIconId'],
