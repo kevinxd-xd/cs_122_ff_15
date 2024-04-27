@@ -65,9 +65,9 @@
 		</div>
 
 		<!-- This is where we put the graphs -->
-		<div class="plot-parent container-sm row">
+		<div class="plot-parent container-fluid row row-cols-3">
 			{% for graph in html_payload['graphs'] %}
-			<div class="container-sm">{{ graph|safe }}</div>
+			<div class="container-sm col">{{ graph|safe }}</div>
 			{% endfor %}
 		</div>
 	</body>
