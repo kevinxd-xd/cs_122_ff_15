@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.config['DATA'] = os.path.join(app.root_path, "data")
 # Graphs to generate
 app.config['GRAPHS'] = [GraphGeneration.create_duration_graph, GraphGeneration.graphs_gamemodes_dist,
-                        GraphGeneration.graphs_surrender_dist]
+                        GraphGeneration.graphs_surrender_dist, GraphGeneration.abilities_used, GraphGeneration.position_played]
 
 # Create an instance of Riot and LoL watcher to pass around
 riot_api = RiotWatcher(api_key=os.getenv("RIOT_API_KEY"))
@@ -70,8 +70,10 @@ def user_search(summoner_name, tagline, region):
     # Collect all the info we collected to pass it to the player stats template
 
     # Path to where the data is saved
-    player.export_json(matches=match_ids, data_directory=app.config['DATA'], league_api=league_api)
-    json_file_path = os.path.join(app.config['DATA'], player.puuid(), "summoner.json")
+    player.export_json(
+        matches=match_ids, data_directory=app.config['DATA'], league_api=league_api)
+    json_file_path = os.path.join(
+        app.config['DATA'], player.puuid(), "summoner.json")
 
     player_data = GraphGeneration.load_file(json_file_path)
     graphs = GraphGeneration.create_graphs(player_data, app.config['GRAPHS'])
@@ -113,6 +115,8 @@ def json_submission():
 
 # How to send a file from directory to user
 # Source: https://stackoverflow.com/questions/24577349/flask-download-a-file
+
+
 @app.route('/download/<puuid>', methods=['GET'])
 def download(puuid):
     file_path = security.safe_join(app.config['DATA'], puuid)
@@ -120,6 +124,7 @@ def download(puuid):
         return send_from_directory(directory=app.config['DATA'], path=security.safe_join(puuid, "summoner.json"))
     else:
         return render_template('error_page.html', status_code=404, status_message="File not found")
+
 
 @app.errorhandler(404)
 def page_404(error):
