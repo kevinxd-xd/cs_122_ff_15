@@ -31,7 +31,6 @@ def create_graphs(player_data, graph_funcs) -> list:
 def create_duration_graph(player_data: dict) -> str:
     # Scatter Plot: Past 20 Game Duration
 
-    graphs = []
     match_ids = list(player_data.keys())[1:]
     # Extract game times
     date = []
@@ -57,7 +56,7 @@ def create_duration_graph(player_data: dict) -> str:
     dd_df['duration'] = dd_df['duration'] + pd.to_datetime('1970/01/01')
 
     graph = px.box(data_frame=dd_df, x="date",
-                       y="duration", title="Duration of Past 20 Games")
+                   y="duration", title="Duration of Past 20 Games")
     # Force format to ignore the workaround added
     graph.update_yaxes(tickformat="%H:%M:%S")
     graph_html = graph.to_html(full_html=False)
@@ -117,26 +116,99 @@ def graphs_surrender_dist(player_data: dict) -> str:
 
     pie_graph = px.pie(data_frame=win_loss_data, values='Count', names="Results",
                        title="Win/Surrender/Loss Distribution",
-                       color_discrete_sequence=["green", "purple", "blue", "red"],
+                       color_discrete_sequence=[
+                           "green", "purple", "blue", "red"],
                        category_orders={
                            "Results": ["win", "gameEndedInSurrender", "gameEndedInEarlySurrender", "loss"]})
     graph_html = pie_graph.to_html(full_html=False)
 
     return graph_html
 
-def win_loss_ratio(player_data: dict) -> str:
-    # player_data['info']['participants']['win'] # boolean
-    pass
-
 
 def abilities_used(player_data: dict) -> str:
-    # player_data['info'][participants']['challenges']['abilityUses']  # int
-    pass
+    match_ids = list(player_data.keys())[1:]
+    date = []
+    abilities_used = []
+    game_modes = []
+    for match_id in match_ids:
+        match_info_pd = pd.Series(player_data[match_id])
+
+        date.append(match_info_pd['info']['gameCreation'])
+
+        abilities_used.append(
+            match_info_pd['info']['participants']['challenges']['abilityUses'])
+
+        game_modes.append(match_info_pd['info']['gameMode'])
+
+    abilities_used_df = pd.DataFrame(
+        data={'date': date,
+              'abilities used': abilities_used,
+              'game mode': game_modes}
+    )
+
+    abilities_used_df['date'] = abilities_used_df['date'].apply(
+        lambda ts: datetime.fromtimestamp(ts / 1000).date()
+    )
+
+    graph = px.box(
+        data_frame=abilities_used_df,
+        x='date',
+        y='abilities used',
+        color='game mode',
+        title="Total Abilities Used in a Game"
+    )
+
+    graph_html = graph.to_html(full_html=False)
+
+    return graph_html
 
 
-def longest_time_alive(player_data: dict) -> str:
-    # player_data['info'][participants']['longestTimeSpentLiving'] # int (seconds)
-    pass
+def position_played(player_data: dict) -> str:
+    match_ids = list(player_data.keys())[1:]
+    positions_count = {
+        "TOP": 0,
+        "JUNGLE": 0,
+        "MIDDLE": 0,
+        "BOTTOM": 0,
+        "SUPPORT": 0,
+        "NO ROLE": 0
+    }
+
+    for match_id in match_ids:
+        match_info_pd = pd.Series(player_data[match_id])
+        role = match_info_pd['info']['participants']['lane']
+        if role == 'TOP':
+            positions_count[role] += 1
+        elif role == 'JUNGLE':
+            positions_count[role] += 1
+        elif role == 'MIDDLE':
+            positions_count[role] += 1
+        elif role == 'BOTTOM':
+            positions_count[role] += 1
+        elif role == 'SUPPORT':
+            positions_count[role] += 1
+        else:
+            positions_count['NO ROLE'] += 1
+
+    positions_data = pd.DataFrame(
+        {'Lane Position': positions_count.keys(),
+         'Count': positions_count.values()}
+    )
+
+    pie_graph = px.pie(
+        data_frame=positions_data,
+        values='Count',
+        names='Lane Position',
+        title='Lane Position Distribution',
+        color_discrete_sequence=["orange", "red",
+                                 "green", "blue", "purple", "black"],
+        category_orders={"Lane Position": [
+            "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "SUPPORT", "NO ROLE"]}
+    )
+
+    graph_html = pie_graph.to_html(full_html=False)
+
+    return graph_html
 
 
 def skillshots_hit_v_abilities(player_data: dict) -> str:
