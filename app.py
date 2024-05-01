@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.config['DATA'] = os.path.join(app.root_path, "data")
 # Graphs to generate
 app.config['GRAPHS'] = [GraphGeneration.create_duration_graph, GraphGeneration.graphs_gamemodes_dist,
-                        GraphGeneration.graphs_surrender_dist, GraphGeneration.abilities_used, GraphGeneration.position_played]
+                        GraphGeneration.graphs_surrender_dist, GraphGeneration.skillshots_v_abilities, GraphGeneration.position_played]
 
 # Create an instance of Riot and LoL watcher to pass around
 riot_api = RiotWatcher(api_key=os.getenv("RIOT_API_KEY"))
@@ -100,7 +100,11 @@ def json_submission():
 
     # Data is ready to be used
     player_data = json.load(submission_data)
-    graphs = GraphGeneration.create_graphs(player_data, app.config["GRAPHS"])
+    try:
+        graphs = GraphGeneration.create_graphs(
+            player_data, app.config["GRAPHS"])
+    except:
+        return render_template("error_page.html", status_code=400, status_message="Not the correct format for JSON file!")
 
     html_payload = {
         'summoner_name': player_data['summonerInfo']['summoner_name'],
