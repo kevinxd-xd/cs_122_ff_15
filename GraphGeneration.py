@@ -125,37 +125,34 @@ def graphs_surrender_dist(player_data: dict) -> str:
     return graph_html
 
 
-def abilities_used(player_data: dict) -> str:
+def skillshots_v_abilities(player_data: dict) -> str:
     match_ids = list(player_data.keys())[1:]
-    date = []
+    skillshots_hit = []
     abilities_used = []
     game_modes = []
     for match_id in match_ids:
         match_info_pd = pd.Series(player_data[match_id])
 
-        date.append(match_info_pd['info']['gameCreation'])
-
+        skillshots_hit.append(
+            match_info_pd['info']['participants']['challenges']['skillshotsHit']
+        )
         abilities_used.append(
             match_info_pd['info']['participants']['challenges']['abilityUses'])
 
         game_modes.append(match_info_pd['info']['gameMode'])
 
     abilities_used_df = pd.DataFrame(
-        data={'date': date,
+        data={'skillshots hit': skillshots_hit,
               'abilities used': abilities_used,
               'game mode': game_modes}
     )
 
-    abilities_used_df['date'] = abilities_used_df['date'].apply(
-        lambda ts: datetime.fromtimestamp(ts / 1000).date()
-    )
-
-    graph = px.box(
+    graph = px.scatter(
         data_frame=abilities_used_df,
-        x='date',
+        x='skillshots hit',
         y='abilities used',
         color='game mode',
-        title="Total Abilities Used in a Game"
+        title="Skillshots Landed Compared to Total Abilities Used"
     )
 
     graph_html = graph.to_html(full_html=False)
@@ -209,9 +206,3 @@ def position_played(player_data: dict) -> str:
     graph_html = pie_graph.to_html(full_html=False)
 
     return graph_html
-
-
-def skillshots_hit_v_abilities(player_data: dict) -> str:
-    # player_data['info'][participants']['challenges']['abilityUses']
-    # player_data['info'][participants']['challenges']['skillshotsDodged']
-    pass
