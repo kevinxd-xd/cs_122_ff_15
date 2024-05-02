@@ -137,5 +137,5 @@ class Summoner:
         user_directory = os.path.join(data_directory, self.puuid())
         if not os.path.exists(user_directory):
             os.makedirs(user_directory)
-        with open(os.path.join(user_directory, 'summoner.json'), 'w') as fo:
+        with open(os.path.join(user_directory, 'summoner.json'), 'w', encoding='UTF-8') as fo:
             json.dump(json_file, fo)  # converts dict to json

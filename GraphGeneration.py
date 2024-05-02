@@ -10,7 +10,7 @@ def load_file(file_path: str) -> dict:
     :param file_path: The file path of the JSON file
     :return: A dictionary containing player information
     """
-    with open(file_path, 'r') as fo:
+    with open(file_path, 'r',encoding='UTF-8') as fo:
         player_data = json.load(fo)
     return player_data
 
