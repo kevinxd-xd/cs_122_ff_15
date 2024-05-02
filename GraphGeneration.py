@@ -1,4 +1,4 @@
-from datetime import datetime, time, timedelta
+from datetime import datetime, timedelta
 import json
 import pandas as pd
 import plotly.express as px
@@ -70,7 +70,10 @@ def graphs_gamemodes_dist(player_data: dict) -> str:
     match_ids = list(player_data.keys())[1:]
 
     for match_id in match_ids:
-        game_modes.append(player_data[match_id]['info']['gameMode'])
+        game_mode = player_data[match_id]['info']['gameMode']
+        if game_mode == 'CHERRY':
+            game_mode = 'ARENA'
+        game_modes.append(game_mode)
 
     for mode in game_modes:
         if mode in game_modes_count:
@@ -138,8 +141,11 @@ def skillshots_v_abilities(player_data: dict) -> str:
         )
         abilities_used.append(
             match_info_pd['info']['participants']['challenges']['abilityUses'])
-
-        game_modes.append(match_info_pd['info']['gameMode'])
+        
+        game_mode = player_data[match_id]['info']['gameMode']
+        if game_mode == 'CHERRY':
+            game_mode = 'ARENA'
+        game_modes.append(game_mode)
 
     abilities_used_df = pd.DataFrame(
         data={'skillshots hit': skillshots_hit,
@@ -171,7 +177,7 @@ def position_played(player_data: dict) -> str:
         "NO ROLE": 0
     }
 
-    for match_id in match_ids:
+    for match_id in match_ids:       
         match_info_pd = pd.Series(player_data[match_id])
         role = match_info_pd['info']['participants']['lane']
         if role == 'TOP':
@@ -187,9 +193,10 @@ def position_played(player_data: dict) -> str:
         else:
             positions_count['NO ROLE'] += 1
 
+
     positions_data = pd.DataFrame(
         {'Lane Position': positions_count.keys(),
-         'Count': positions_count.values()}
+         'Count': positions_count.values(),}
     )
 
     pie_graph = px.pie(
