@@ -16,8 +16,11 @@ app = Flask(__name__)
 # Config for serving JSON files safely
 app.config['DATA'] = os.path.join(app.root_path, "data")
 # Graphs to generate
-app.config['GRAPHS'] = [GraphGeneration.create_duration_graph, GraphGeneration.graphs_gamemodes_dist,
-                        GraphGeneration.graphs_surrender_dist, GraphGeneration.skillshots_v_abilities, GraphGeneration.position_played]
+app.config['GRAPHS'] = [GraphGeneration.create_duration_graph, 
+                        GraphGeneration.graphs_gamemodes_dist,
+                        GraphGeneration.graphs_surrender_dist, 
+                        GraphGeneration.skillshots_v_abilities, 
+                        GraphGeneration.position_played]
 
 # Create an instance of Riot and LoL watcher to pass around
 riot_api = RiotWatcher(api_key=os.getenv("RIOT_API_KEY"))
