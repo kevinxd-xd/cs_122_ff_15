@@ -4,13 +4,17 @@ import pandas as pd
 import plotly.express as px
 
 
+class CustomError(Exception):
+    pass
+
+
 def load_file(file_path: str) -> dict:
     """
     Loads player's JSON file from the data folder
     :param file_path: The file path of the JSON file
     :return: A dictionary containing player information
     """
-    with open(file_path, 'r',encoding='UTF-8') as fo:
+    with open(file_path, 'r', encoding='UTF-8') as fo:
         player_data = json.load(fo)
     return player_data
 
@@ -22,16 +26,23 @@ def create_graphs(player_data, graph_funcs) -> list:
     :returns: A list of html graphs
     """
     graphs = []
+
     for func in graph_funcs:
-        create_graph = func(player_data)
-        graphs.append(create_graph)
+        try:
+            create_graph = func(player_data)
+            graphs.append(create_graph)
+        except KeyError as e:
+            raise CustomError("Invalid JSON file contents") from e
     return graphs
 
 
 def create_duration_graph(player_data: dict) -> str:
     # Scatter Plot: Past 20 Game Duration
+    try:
+        match_ids = list(player_data.keys())[1:]
+    except KeyError as e:
+        raise CustomError("Invalid JSON file content") from e
 
-    match_ids = list(player_data.keys())[1:]
     # Extract game times
     date = []
     durations = []
@@ -67,7 +78,10 @@ def create_duration_graph(player_data: dict) -> str:
 def graphs_gamemodes_dist(player_data: dict) -> str:
     game_modes = []
     game_modes_count = {}
-    match_ids = list(player_data.keys())[1:]
+    try:
+        match_ids = list(player_data.keys())[1:]
+    except KeyError as e:
+        raise CustomError("Invalid JSON file content") from e
 
     for match_id in match_ids:
         game_mode = player_data[match_id]['info']['gameMode']
@@ -91,7 +105,10 @@ def graphs_gamemodes_dist(player_data: dict) -> str:
 
 
 def graphs_surrender_dist(player_data: dict) -> str:
-    match_ids = list(player_data.keys())[1:]
+    try:
+        match_ids = list(player_data.keys())[1:]
+    except KeyError as e:
+        raise CustomError("Invalid JSON file content") from e
     # Set up counts
     result_counts = {
         "win": 0,
@@ -129,7 +146,11 @@ def graphs_surrender_dist(player_data: dict) -> str:
 
 
 def skillshots_v_abilities(player_data: dict) -> str:
-    match_ids = list(player_data.keys())[1:]
+    try:
+        match_ids = list(player_data.keys())[1:]
+    except KeyError as e:
+        raise CustomError("Invalid JSON file content") from e
+
     skillshots_hit = []
     abilities_used = []
     game_modes = []
@@ -141,7 +162,7 @@ def skillshots_v_abilities(player_data: dict) -> str:
         )
         abilities_used.append(
             match_info_pd['info']['participants']['challenges']['abilityUses'])
-        
+
         game_mode = player_data[match_id]['info']['gameMode']
         if game_mode == 'CHERRY':
             game_mode = 'ARENA'
@@ -167,7 +188,11 @@ def skillshots_v_abilities(player_data: dict) -> str:
 
 
 def position_played(player_data: dict) -> str:
-    match_ids = list(player_data.keys())[1:]
+    try:
+        match_ids = list(player_data.keys())[1:]
+    except KeyError as e:
+        raise CustomError("Invalid JSON file content") from e
+
     positions_count = {
         "TOP": 0,
         "JUNGLE": 0,
@@ -177,7 +202,7 @@ def position_played(player_data: dict) -> str:
         "NO ROLE": 0
     }
 
-    for match_id in match_ids:       
+    for match_id in match_ids:
         match_info_pd = pd.Series(player_data[match_id])
         role = match_info_pd['info']['participants']['lane']
         if role == 'TOP':
@@ -193,10 +218,9 @@ def position_played(player_data: dict) -> str:
         else:
             positions_count['NO ROLE'] += 1
 
-
     positions_data = pd.DataFrame(
         {'Lane Position': positions_count.keys(),
-         'Count': positions_count.values(),}
+         'Count': positions_count.values(), }
     )
 
     pie_graph = px.pie(

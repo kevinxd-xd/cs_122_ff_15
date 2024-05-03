@@ -7,19 +7,22 @@ from dotenv import load_dotenv
 from markupsafe import escape
 from summoner import Summoner
 import constants
+from GraphGeneration import CustomError
 import GraphGeneration
 
 # Load API key and other secrets from .env file
 load_dotenv(override=True)
 
 app = Flask(__name__)
+
 # Config for serving JSON files safely
 app.config['DATA'] = os.path.join(app.root_path, "data")
+
 # Graphs to generate
-app.config['GRAPHS'] = [GraphGeneration.create_duration_graph, 
+app.config['GRAPHS'] = [GraphGeneration.create_duration_graph,
                         GraphGeneration.graphs_gamemodes_dist,
-                        GraphGeneration.graphs_surrender_dist, 
-                        GraphGeneration.skillshots_v_abilities, 
+                        GraphGeneration.graphs_surrender_dist,
+                        GraphGeneration.skillshots_v_abilities,
                         GraphGeneration.position_played]
 
 # Create an instance of Riot and LoL watcher to pass around
@@ -65,7 +68,9 @@ def user_search(summoner_name, tagline, region):
         status_code = err_dct['status']['status_code']
         status_message = err_dct['status']['message']
         return render_template("error_page.html", status_code=status_code, status_message=status_message)
-    except Exception as e:
+    except CustomError as e:
+        return render_template("error_page.html", status_code=403, status_message=e.args[0])
+    except:
         abort(404, 'Something went wrong. Please try again')
 
     match_ids = player.get_match_ids()  # list of most recent 20 match ids
@@ -94,7 +99,7 @@ def user_search(summoner_name, tagline, region):
     return render_template('player_stats_template.html', html_payload=html_payload)
 
 
-@app.route('/json_submission', methods=['POST'])
+@ app.route('/json_submission', methods=['POST'])
 def json_submission():
     submission_data = request.files['json_upload']
     # If the file type is not of JSON type then we render an error page
@@ -106,8 +111,8 @@ def json_submission():
     try:
         graphs = GraphGeneration.create_graphs(
             player_data, app.config["GRAPHS"])
-    except:
-        return render_template("error_page.html", status_code=400, status_message="Not the correct format for JSON file!")
+    except CustomError as e:
+        return render_template("error_page.html", status_code=400, status_message=e.args[0])
 
     html_payload = {
         'summoner_name': player_data['summonerInfo']['summoner_name'],
@@ -124,7 +129,7 @@ def json_submission():
 # Source: https://stackoverflow.com/questions/24577349/flask-download-a-file
 
 
-@app.route('/download/<puuid>', methods=['GET'])
+@ app.route('/download/<puuid>', methods=['GET'])
 def download(puuid):
     file_path = security.safe_join(app.config['DATA'], puuid)
     if os.path.exists(file_path):
@@ -133,7 +138,7 @@ def download(puuid):
         return render_template('error_page.html', status_code=404, status_message="File not found")
 
 
-@app.errorhandler(404)
+@ app.errorhandler(404)
 def page_404(error):
     # Renders the error template and passes the error message to display
-    return render_template('error_page.html', status_code=404, status_message="Page not found")
+    return render_template('error_page.html', status_code=404, status_message=error)

@@ -1,8 +1,9 @@
 import os
 import json
-from riotwatcher import RiotWatcher, LolWatcher
+from riotwatcher import RiotWatcher, LolWatcher, ApiError
 import constants
 import LolMatch
+from GraphGeneration import CustomError
 
 
 class Summoner:
@@ -57,10 +58,16 @@ class Summoner:
         :param region: Region/server of the summoner
         :return: Summoner object
         """
-        summoner = riot_watcher.account.by_riot_id(
-            game_name=game_name, tag_line=tag_line, region="americas")
-        return cls(lol_watcher=lol_watcher, puuid=summoner['puuid'], game_name=game_name, tag_line=tag_line,
-                   region=region)
+        try:
+            summoner = riot_watcher.account.by_riot_id(
+                game_name=game_name, tag_line=tag_line, region="americas")
+        except ApiError as e:
+            # Exception chaining
+            # Source: https://stackoverflow.com/questions/696047/re-raise-exception-with-a-different-type-and-message-preserving-existing-inform
+            raise CustomError("Invalid API key") from e
+        else:
+            return cls(lol_watcher=lol_watcher, puuid=summoner['puuid'], game_name=game_name, tag_line=tag_line,
+                       region=region)
 
     def get_summoner_info(self) -> dict:
         """
@@ -131,8 +138,9 @@ class Summoner:
 
                 summoner_match_info = json_file[match]['info']['participants'][index]
                 json_file[match]['info']['participants'] = summoner_match_info
-            except:
-                print(f"Game Info {match} not found")
+            except ApiError:
+                # Game information is not available. Move on to the next match id
+                print(f"Game Info for {match} cannot be found")
 
         user_directory = os.path.join(data_directory, self.puuid())
         if not os.path.exists(user_directory):
