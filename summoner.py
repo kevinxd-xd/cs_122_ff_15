@@ -41,9 +41,17 @@ class Summoner:
         :param region: Region/server of the summoner
         :return: Summoner object
         """
-        summoner = riot_watcher.account.by_puuid(
-            puuid=puuid, region="americas")
-        return cls(lol_watcher=lol_watcher, puuid=puuid, game_name=summoner['gameName'], tag_line=summoner['tagLine'],
+        try:
+            summoner = riot_watcher.account.by_puuid(
+                puuid=puuid, region="americas")
+        except ApiError as e:
+            # Exception chaining
+            # Source: https://stackoverflow.com/questions/696047/re-raise-exception-with-a-different-type-and-message-preserving-existing-inform
+            raise CustomError(403, "Invalid API key") from e
+        except Exception as e:
+            raise CustomError(400, "Unknown Error. Check logs for more information.") from e
+        else:
+            return cls(lol_watcher=lol_watcher, puuid=puuid, game_name=summoner['gameName'], tag_line=summoner['tagLine'],
                    region=region)
 
     @classmethod
@@ -62,9 +70,16 @@ class Summoner:
             summoner = riot_watcher.account.by_riot_id(
                 game_name=game_name, tag_line=tag_line, region="americas")
         except ApiError as e:
-            # Exception chaining
-            # Source: https://stackoverflow.com/questions/696047/re-raise-exception-with-a-different-type-and-message-preserving-existing-inform
-            raise CustomError("Invalid API key") from e
+            # Convert error response to a dictionary that we can access
+            err_dct = json.loads(e.response.text)
+            if err_dct['status']['status_code'] == 403:
+                # Exception chaining
+                # Source: https://stackoverflow.com/questions/696047/re-raise-exception-with-a-different-type-and-message-preserving-existing-inform
+                raise CustomError(403, "Invalid API key") from e
+            else:
+                raise CustomError(400, err_dct['status']['message']) from e
+        except Exception as e:
+            raise CustomError(400, "Unknown Error. Check logs for more information.") from e
         else:
             return cls(lol_watcher=lol_watcher, puuid=summoner['puuid'], game_name=game_name, tag_line=tag_line,
                        region=region)
@@ -74,14 +89,24 @@ class Summoner:
         Returns summoner name, profile icon, level, PUUID, etc.
         :return: basic information about the summoner
         """
-        return self.__lol_watcher.summoner.by_puuid(encrypted_puuid=self.__summoner_puuid, region=self.__region)
+        try:
+            return self.__lol_watcher.summoner.by_puuid(encrypted_puuid=self.__summoner_puuid, region=self.__region)
+        except ApiError as e:
+            raise CustomError(400, e.args[0]) from e
+        except Exception as e:
+            raise CustomError(400, "Unknown Error. Check logs for more information.") from e
 
     def get_match_ids(self) -> list[str]:
         """
         Returns a list of match ids of recent games played by summoner (Default: 20)
         :return: list of match_ids
         """
-        return self.__lol_watcher.match.matchlist_by_puuid(puuid=self.__summoner_puuid, region=self.__region)
+        try:
+            return self.__lol_watcher.match.matchlist_by_puuid(puuid=self.__summoner_puuid, region=self.__region)
+        except ApiError as e:
+            raise CustomError(400, e.args[0]) from e
+        except Exception as e:
+            raise CustomError(400, "Unknown Error. Check logs for more information.") from e
 
     def puuid(self) -> str:
         """

@@ -1,5 +1,6 @@
-from riotwatcher import LolWatcher
+from riotwatcher import LolWatcher, ApiError
 import pandas as pd
+from GraphGeneration import CustomError
 
 
 def get_match_details(lol_watcher: LolWatcher, match_id: str, region: str) -> dict:
@@ -10,7 +11,12 @@ def get_match_details(lol_watcher: LolWatcher, match_id: str, region: str) -> di
     :param region: Region/server of player/match
     :return: A dictionary with all details of the match
     """
-    return lol_watcher.match.by_id(match_id=match_id, region=region)
+    try:
+        return lol_watcher.match.by_id(match_id=match_id, region=region)
+    except ApiError as e:
+        raise CustomError(400, e.args[0]) from e
+    except Exception as e:
+        raise CustomError(400, "Unknown Error. Check logs for more information.") from e
 
 
 def get_player_stats(match: dict) -> pd.DataFrame:

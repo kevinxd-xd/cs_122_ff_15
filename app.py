@@ -59,18 +59,9 @@ def user_search(summoner_name, tagline, region):
         player = Summoner.from_game_name(lol_watcher=league_api, riot_watcher=riot_api, game_name=summoner_name,
                                          tag_line=tagline, region=region)
         player_info = player.get_summoner_info()
-    # Improve the error handling here
-    # Handle API errors raised from RiotWatcher
-    # Our own custom one as well
-    except ApiError as err:
-        # Convert error response to a dictionary that we can access
-        err_dct = json.loads(err.response.text)
-        status_code = err_dct['status']['status_code']
-        status_message = err_dct['status']['message']
-        return render_template("error_page.html", status_code=status_code, status_message=status_message)
     except CustomError as e:
-        return render_template("error_page.html", status_code=403, status_message=e.args[0])
-    except:
+        abort(e.args[0], e.args[1])
+    except Exception as e:
         abort(404, 'Something went wrong. Please try again')
 
     match_ids = player.get_match_ids()  # list of most recent 20 match ids
@@ -104,7 +95,7 @@ def json_submission():
     submission_data = request.files['json_upload']
     # If the file type is not of JSON type then we render an error page
     if submission_data.mimetype != 'application/json':
-        return render_template("error_page.html", status_code=400, status_message="Not a JSON file!")
+        abort(400, "Not a JSON file!")
 
     # Data is ready to be used
     player_data = json.load(submission_data)
@@ -112,7 +103,9 @@ def json_submission():
         graphs = GraphGeneration.create_graphs(
             player_data, app.config["GRAPHS"])
     except CustomError as e:
-        return render_template("error_page.html", status_code=400, status_message=e.args[0])
+        abort(e.args[0], e.args[1])
+    except Exception as e:
+        abort(404, 'Something went wrong. Please try again')
 
     html_payload = {
         'summoner_name': player_data['summonerInfo']['summoner_name'],
@@ -135,10 +128,20 @@ def download(puuid):
     if os.path.exists(file_path):
         return send_from_directory(directory=app.config['DATA'], path=security.safe_join(puuid, "summoner.json"))
     else:
-        return render_template('error_page.html', status_code=404, status_message="File not found")
+        abort(404, "File not found")
 
 
-@ app.errorhandler(404)
+@app.errorhandler(404)
 def page_404(error):
     # Renders the error template and passes the error message to display
-    return render_template('error_page.html', status_code=404, status_message=error)
+    return render_template('error_page.html', status_message=error)
+
+
+@app.errorhandler(403)
+def page_403(error):
+    return render_template('error_page.html', status_message=error)
+
+
+@app.errorhandler(400)
+def page_400(error):
+    return render_template('error_page.html', status_message=error)

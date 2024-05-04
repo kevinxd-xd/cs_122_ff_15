@@ -32,7 +32,7 @@ def create_graphs(player_data, graph_funcs) -> list:
             create_graph = func(player_data)
             graphs.append(create_graph)
         except KeyError as e:
-            raise CustomError("Invalid JSON file contents") from e
+            raise CustomError(400, "Invalid JSON file contents") from e
     return graphs
 
 
@@ -41,7 +41,7 @@ def create_duration_graph(player_data: dict) -> str:
     try:
         match_ids = list(player_data.keys())[1:]
     except KeyError as e:
-        raise CustomError("Invalid JSON file content") from e
+        raise CustomError(400, "Invalid JSON file content") from e
 
     # Extract game times
     date = []
@@ -81,7 +81,7 @@ def graphs_gamemodes_dist(player_data: dict) -> str:
     try:
         match_ids = list(player_data.keys())[1:]
     except KeyError as e:
-        raise CustomError("Invalid JSON file content") from e
+        raise CustomError(400, "Invalid JSON file content") from e
 
     for match_id in match_ids:
         game_mode = player_data[match_id]['info']['gameMode']
@@ -108,7 +108,7 @@ def graphs_surrender_dist(player_data: dict) -> str:
     try:
         match_ids = list(player_data.keys())[1:]
     except KeyError as e:
-        raise CustomError("Invalid JSON file content") from e
+        raise CustomError(400, "Invalid JSON file content") from e
     # Set up counts
     result_counts = {
         "win": 0,
@@ -149,7 +149,7 @@ def skillshots_v_abilities(player_data: dict) -> str:
     try:
         match_ids = list(player_data.keys())[1:]
     except KeyError as e:
-        raise CustomError("Invalid JSON file content") from e
+        raise CustomError(400, "Invalid JSON file content") from e
 
     skillshots_hit = []
     abilities_used = []
@@ -191,7 +191,7 @@ def position_played(player_data: dict) -> str:
     try:
         match_ids = list(player_data.keys())[1:]
     except KeyError as e:
-        raise CustomError("Invalid JSON file content") from e
+        raise CustomError(400, "Invalid JSON file content") from e
 
     positions_count = {
         "TOP": 0,
