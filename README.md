@@ -1,5 +1,4 @@
 # LoLStats
----
 ## Prerequisites
 - 🐍 Python 3.12^
 
@@ -63,6 +62,10 @@ be listening on port 5000 on localhost.
 Either of the links should bring you to the homepage.
 
 # Running the testcases
+Once you are on the homepage, you should see two cards labeled with both of the features. One is "Search via the Riot
+API". The other card is labeled "Create analytics using JSON data (Test Case Input)". Use these two features to interact
+with the web application and run the testcases.
+
 In the zipped file, there should be a folder named testcases. In this folder, there should be 5 testcases that you can
 upload to the web app to create the data analytics. Not all of the five files will work since we added a few to test the
 error handling capabilities of our applicaiton. Here is a table of the expected results for each uploaded file.
