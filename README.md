@@ -6,12 +6,14 @@
 ## How to install and run
 1. Start by cloning the repository to the desired path on your system
 ### Create a virtual environment
-To avoid any conflicts with installed Python libraries on your system, we'll need to create a virtual environment to avoid these conflicts.
+To avoid any conflicts with installed Python libraries on your system, we'll need to create a virtual environment to
+avoid these conflicts.
 
 **Tip**: To ensure installation process goes as smoothly as possible, please start in the root of the project directory.
 
 **Steps:**
-1. Create a folder called "venv". This is where all of your virtual environment files will go. You can run the command below to get started.
+1. Create a folder called "venv". This is where all of your virtual environment files will go. You can run the command
+2. below to get started.
 >mkdir venv
 2. After you've made the new folder, navigate into it the folder
 >cd  ./venv
@@ -22,7 +24,8 @@ To avoid any conflicts with installed Python libraries on your system, we'll nee
 To activate (Windows Powershell):
 > /PATH_TO_YOUR_VENV_FOLDER/Scripts/Activate.ps1
 
-**WARNING**: You may have execution issues on Windows powershell due to the default execution-policy set. You will need to change it to run the virtual environment.
+**WARNING**: You may have execution issues on Windows powershell due to the default execution-policy set. You will need
+to change it to run the virtual environment.
 
 To activate (MacOS zsh):
 > source /PATH_TO_YOUR_VENV_FOLDER/Scripts/activate
@@ -59,5 +62,21 @@ be listening on port 5000 on localhost.
 
 Either of the links should bring you to the homepage.
 
+# Running the testcases
+In the zipped file, there should be a folder named testcases. In this folder, there should be 5 testcases that you can
+upload to the web app to create the data analytics. Not all of the five files will work since we added a few to test the
+error handling capabilities of our applicaiton. Here is a table of the expected results for each uploaded file.
 
+| Testcase File                           | Expected Results                                                                               |
+|-----------------------------------------|------------------------------------------------------------------------------------------------|
+| testcase_1.json                         | SUCCESS: Displays Body#NA1’s player information and graphs                                     |
+| testcase_2.json                         | SUCCESS: Displays Her Challenger#Luna’s player information and graphs                          |
+| testcase_3.json                         | SUCCESS: SUCCESS: Displays Fish Kid#NA1’s player information and graphs                        |
+| testcase_4.json                         | FAILURE: User sees a 400 page due to a non-JSON file submission                                |
+| testcase_5.json                         | FAILURE: User sees a 400 page due to incorrect JSON data information that could not be parsed. |
+| Search function with no/invalid API Key | FAILURE: User sees a 403 page stating “Invalid API Key”                                        |
 
+The last testcase does not have a file associated with it. To test this feature, please fill out the
+"Search via the Riot API" form and attempt to submit. You should see an error be thrown about there being no valid API
+key. This happens because you need a valid API key to access the game server's data. Without the key, you will be unable
+to complete the search, throwing an error.
