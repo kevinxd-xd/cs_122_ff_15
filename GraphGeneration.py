@@ -5,6 +5,7 @@ import plotly.express as px
 
 
 class CustomError(Exception):
+    ''' Custom Exception for error handling'''
     pass
 
 
@@ -32,11 +33,16 @@ def create_graphs(player_data, graph_funcs) -> list:
             create_graph = func(player_data)
             graphs.append(create_graph)
         except KeyError as e:
-            raise CustomError(400, "Invalid JSON file contents") from e
+            raise CustomError(400, "Invalid JSON file") from e
     return graphs
 
 
 def create_duration_graph(player_data: dict) -> str:
+    '''
+    Creates a box plot with the durations of the games played 
+    :param player_data: A dictionary from a JSON file containing player information
+    :returns: A string of the graph's HTML
+    '''
     # Scatter Plot: Past 20 Game Duration
     try:
         match_ids = list(player_data.keys())[1:]
@@ -76,18 +82,23 @@ def create_duration_graph(player_data: dict) -> str:
 
 
 def graphs_gamemodes_dist(player_data: dict) -> str:
+    '''
+    Creates a pie chart of the different gamemodes played
+    :param player_data: A dictionary from a JSON file containing player information
+    :returns: A string of the graph's HTML
+    '''
     game_modes = []
     game_modes_count = {}
-    try:
-        match_ids = list(player_data.keys())[1:]
-    except KeyError as e:
-        raise CustomError(400, "Invalid JSON file content") from e
+    match_ids = list(player_data.keys())[1:]
 
     for match_id in match_ids:
-        game_mode = player_data[match_id]['info']['gameMode']
-        if game_mode == 'CHERRY':
-            game_mode = 'ARENA'
-        game_modes.append(game_mode)
+        try:
+            game_mode = player_data[match_id]['info']['gameMode']
+            if game_mode == 'CHERRY':
+                game_mode = 'ARENA'
+            game_modes.append(game_mode)
+        except KeyError as e:
+            raise CustomError(400, "Invalid JSON file content") from e
 
     for mode in game_modes:
         if mode in game_modes_count:
@@ -105,10 +116,12 @@ def graphs_gamemodes_dist(player_data: dict) -> str:
 
 
 def graphs_surrender_dist(player_data: dict) -> str:
-    try:
-        match_ids = list(player_data.keys())[1:]
-    except KeyError as e:
-        raise CustomError(400, "Invalid JSON file content") from e
+    '''
+    Creates a pie chart of the game end result
+    :param player_data: A dictionary from a JSON file containing player information
+    :returns: A string of the graph's HTML
+    '''
+    match_ids = list(player_data.keys())[1:]
     # Set up counts
     result_counts = {
         "win": 0,
@@ -118,18 +131,21 @@ def graphs_surrender_dist(player_data: dict) -> str:
     }
 
     for match_id in match_ids:
-        win = player_data[match_id]['info']['participants']['win']
-        surrender = player_data[match_id]['info']['participants']['gameEndedInSurrender']
-        surrender_early = player_data[match_id]['info']['participants']['gameEndedInEarlySurrender']
+        try:
+            win = player_data[match_id]['info']['participants']['win']
+            surrender = player_data[match_id]['info']['participants']['gameEndedInSurrender']
+            surrender_early = player_data[match_id]['info']['participants']['gameEndedInEarlySurrender']
 
-        if win:
-            result_counts['win'] += 1
-        elif surrender and not surrender_early:
-            result_counts['gameEndedInSurrender'] += 1
-        elif not surrender and not surrender_early:
-            result_counts['loss'] += 1
-        else:
-            result_counts['gameEndedInEarlySurrender'] += 1
+            if win:
+                result_counts['win'] += 1
+            elif surrender and not surrender_early:
+                result_counts['gameEndedInSurrender'] += 1
+            elif not surrender and not surrender_early:
+                result_counts['loss'] += 1
+            else:
+                result_counts['gameEndedInEarlySurrender'] += 1
+        except KeyError:
+            print(f"No end result information for Game ID: {match_id}")
 
     win_loss_data = pd.DataFrame({'Results': result_counts.keys(),
                                   'Count': result_counts.values()})
@@ -146,6 +162,11 @@ def graphs_surrender_dist(player_data: dict) -> str:
 
 
 def skillshots_v_abilities(player_data: dict) -> str:
+    '''
+    Creates a scatter plot of the skillshots and abilities used
+    :param player_data: A dictionary from a JSON file containing player information
+    :returns: A string of the graph's HTML
+    '''
     try:
         match_ids = list(player_data.keys())[1:]
     except KeyError as e:
@@ -155,18 +176,22 @@ def skillshots_v_abilities(player_data: dict) -> str:
     abilities_used = []
     game_modes = []
     for match_id in match_ids:
-        match_info_pd = pd.Series(player_data[match_id])
+        try:
+            match_info_pd = pd.Series(player_data[match_id])
 
-        skillshots_hit.append(
-            match_info_pd['info']['participants']['challenges']['skillshotsHit']
-        )
-        abilities_used.append(
-            match_info_pd['info']['participants']['challenges']['abilityUses'])
+            skillshots_hit.append(
+                match_info_pd['info']['participants']['challenges']['skillshotsHit']
+            )
+            abilities_used.append(
+                match_info_pd['info']['participants']['challenges']['abilityUses'])
 
-        game_mode = player_data[match_id]['info']['gameMode']
-        if game_mode == 'CHERRY':
-            game_mode = 'ARENA'
-        game_modes.append(game_mode)
+            game_mode = player_data[match_id]['info']['gameMode']
+            if game_mode == 'CHERRY':
+                game_mode = 'ARENA'
+            game_modes.append(game_mode)
+        except KeyError:
+            print(
+                f"No skillshots and abilities information available for Game ID: {match_id}")
 
     abilities_used_df = pd.DataFrame(
         data={'skillshots hit': skillshots_hit,
@@ -188,6 +213,11 @@ def skillshots_v_abilities(player_data: dict) -> str:
 
 
 def position_played(player_data: dict) -> str:
+    '''
+    Creates a pie chart showing the distribution of the roles played
+    :param player_data: A dictionary from a JSON file containing player information
+    :returns: A string of the graph's HTML
+    '''
     try:
         match_ids = list(player_data.keys())[1:]
     except KeyError as e:
@@ -203,24 +233,27 @@ def position_played(player_data: dict) -> str:
     }
 
     for match_id in match_ids:
-        match_info_pd = pd.Series(player_data[match_id])
-        role = match_info_pd['info']['participants']['lane']
-        if role == 'TOP':
-            positions_count[role] += 1
-        elif role == 'JUNGLE':
-            positions_count[role] += 1
-        elif role == 'MIDDLE':
-            positions_count[role] += 1
-        elif role == 'BOTTOM':
-            positions_count[role] += 1
-        elif role == 'SUPPORT':
-            positions_count[role] += 1
-        else:
-            positions_count['NO ROLE'] += 1
+        try:
+            match_info_pd = pd.Series(player_data[match_id])
+            role = match_info_pd['info']['participants']['lane']
+            if role == 'TOP':
+                positions_count[role] += 1
+            elif role == 'JUNGLE':
+                positions_count[role] += 1
+            elif role == 'MIDDLE':
+                positions_count[role] += 1
+            elif role == 'BOTTOM':
+                positions_count[role] += 1
+            elif role == 'SUPPORT':
+                positions_count[role] += 1
+            else:
+                positions_count['NO ROLE'] += 1
+        except KeyError:
+            print(f"No role information for Game ID: {match_id}")
 
     positions_data = pd.DataFrame(
         {'Lane Position': positions_count.keys(),
-         'Count': positions_count.values(), }
+         'Count': positions_count.values()}
     )
 
     pie_graph = px.pie(
@@ -229,9 +262,11 @@ def position_played(player_data: dict) -> str:
         names='Lane Position',
         title='Lane Position Distribution',
         color_discrete_sequence=["orange", "red",
-                                 "green", "blue", "purple", "black"],
-        category_orders={"Lane Position": [
-            "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "SUPPORT", "NO ROLE"]}
+                                 "green", "blue",
+                                 "purple", "black"],
+        category_orders={"Lane Position":
+                         ["TOP", "JUNGLE", "MIDDLE",
+                          "BOTTOM", "SUPPORT", "NO ROLE"]}
     )
 
     graph_html = pie_graph.to_html(full_html=False)
