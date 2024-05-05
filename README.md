@@ -2,8 +2,22 @@
 ## Prerequisites
 - 🐍 Python 3.12^
 
-## How to install and run
-1. Start by cloning the repository to the desired path on your system
+## Optional (Riot API Search)
+If you have access to the Riot Games API, you can generate an API key to use with the Search via Riot API feature.
+
+1. Head to https://developer.riotgames.com/apis
+2. Login to your account
+3. Go to the dashboard
+4. Click on Generate/Regenerate API Key
+5. Copy your key
+6. Create a file called `.env` in the root directory of the project
+7. Open the `.env` file with your editor of choice
+8. Add the line `RIOT_API_KEY=<YOUR_DEVELOPMENT_API_KEY_HERE>`, replacing '<YOUR_DEVELOPMENT_API_KEY_HERE>' with the
+key you copied.
+
+## How to install and run (2 methods)
+Start by cloning the repository to the desired path on your system
+## Method 1 (Python Venv)
 ### Create a virtual environment
 To avoid any conflicts with installed Python libraries on your system, we'll need to create a virtual environment to
 avoid these conflicts.
@@ -60,6 +74,38 @@ be listening on port 5000 on localhost.
 > http://localhost:5000
 
 Either of the links should bring you to the homepage.
+
+## Method 2 (Dockerfile)
+To install via the Dockerfile, ensure that you have docker installed and running on your machine.
+
+To verify this, open up your terminal and run the following command:
+
+`docker -v`
+
+It should return your docker version number. If you get any sort of error, double-check your docker installation.
+
+In the root of the project directory, the Dockerfile will instruct docker on how to build the image.
+
+To build the image run:
+
+`docker build -t lol-stats:latest .`
+
+This should build the image for us to run. Give it a few moments to finish up.
+
+After the image has been built, you can now run it using docker with the following command:
+
+`docker run -p 5000:5000 lol-stats:latest`
+
+This command specifies the image to run and what ports to map from the container to the outside world. In our case, we
+are mapping port 5000 outside, to port 5000 inside the container.
+
+You should now be able to access the web application at:
+
+> http://127.0.0.1:5000
+
+**OR**
+
+> http://localhost:5000
 
 # Running the testcases
 Once you are on the homepage, you should see two cards labeled with both of the features. One is "Search via the Riot
