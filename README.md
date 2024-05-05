@@ -2,20 +2,21 @@
 ## Prerequisites
 - 🐍 Python 3.12^
 
-## Optional (Riot API Search)
-If you have access to the Riot Games API, you can generate an API key to use with the Search via Riot API feature.
+# Table of Contents
+- [How to install and run (2 methods)](#install-methods)
+  - [Method 1: Dockerfile](#install-method-1)
+  - [Method 2: Python Venv](#install-method-2)
+- [Optional: Add Riot Games API Key](#extension-api-key)
+- [Running the test cases](#run-testcases)
 
-1. Head to https://developer.riotgames.com/apis
-2. Login to your account
-3. Go to the dashboard
-4. Click on Generate/Regenerate API Key
-5. Copy your key
-7. Open the `.env` file with your editor of choice
-8. Replace '<YOUR_DEVELOPMENT_API_KEY_HERE>' with the  key you copied.
+<div id="install-methods" />
 
 ## How to install and run (2 methods)
 
 Start by cloning the repository to the desired path on your system
+
+<div id="install-method-1" />
+
 ### Method 1 (Dockerfile)
 
 To install via the Dockerfile, ensure that you have docker installed and running on your machine.
@@ -48,6 +49,11 @@ You should now be able to access the web application at:
 **OR**
 
 > http://localhost:5000
+
+**Note:** If you would like to user the Search via Riot feature, you'll need to generate a development API key from Riot.
+Refer to: [Optional: Add Riot Games API Key](#extension-api-key)
+
+<div id="install-method-2" />
 
 ### Method 2 (Python Venv)
 #### Create a virtual environment
@@ -105,6 +111,26 @@ be listening on port 5000 on localhost.
 > http://localhost:5000
 
 Either of the links should bring you to the homepage.
+
+**Note:** If you would like to user the Search via Riot feature, you'll need to generate a development API key from Riot.
+Refer to: [Optional: Add Riot Games API Key](#extension-api-key)
+
+<div id="extension-api-key" />
+
+## Optional (Riot API Search)
+If you have access to the Riot Games API, you can generate an API key to use with the Search via Riot API feature.
+
+1. Head to https://developer.riotgames.com/apis
+2. Login to your account
+3. Go to the dashboard
+4. Click on Generate/Regenerate API Key
+5. Copy your key
+7. Open the `.env` file with your editor of choice
+8. Replace '<YOUR_DEVELOPMENT_API_KEY_HERE>' with the  key you copied.
+
+If you are using the Dockerfile method, you will need to rebuild your image and re-run it after setting the .env file up.
+
+<div id="run-testcases" />
 
 ## Running the testcases
 Once you are on the homepage, you should see two cards labeled with both of the features. One is "Search via the Riot
