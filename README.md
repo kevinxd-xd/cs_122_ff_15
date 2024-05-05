@@ -15,7 +15,6 @@ If you have access to the Riot Games API, you can generate an API key to use wit
 
 ## How to install and run (2 methods)
 
----
 Start by cloning the repository to the desired path on your system
 ### Method 1 (Dockerfile)
 
@@ -120,7 +119,7 @@ error handling capabilities of our applicaiton. Here is a table of the expected 
 |-----------------------------------------|------------------------------------------------------------------------------------------------|
 | testcase_1.json                         | SUCCESS: Displays Body#NA1’s player information and graphs                                     |
 | testcase_2.json                         | SUCCESS: Displays Her Challenger#Luna’s player information and graphs                          |
-| testcase_3.json                         | SUCCESS: SUCCESS: Displays Fish Kid#NA1’s player information and graphs                        |
+| testcase_3.json                         | SUCCESS: Displays Fish Kid#NA1’s player information and graphs                                 |
 | testcase_4.json                         | FAILURE: User sees a 400 page due to a non-JSON file submission                                |
 | testcase_5.json                         | FAILURE: User sees a 400 page due to incorrect JSON data information that could not be parsed. |
 | Search function with no/invalid API Key | FAILURE: User sees a 403 page stating “Invalid API Key”                                        |
