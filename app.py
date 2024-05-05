@@ -2,7 +2,7 @@ import json
 import os
 from flask import Flask, render_template, redirect, url_for, request, abort, send_from_directory
 from werkzeug import security
-from riotwatcher import LolWatcher, RiotWatcher, ApiError
+from riotwatcher import LolWatcher, RiotWatcher
 from dotenv import load_dotenv
 from markupsafe import escape
 from summoner import Summoner
