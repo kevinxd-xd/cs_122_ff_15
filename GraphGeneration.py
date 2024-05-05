@@ -72,8 +72,11 @@ def create_duration_graph(player_data: dict) -> str:
     # Source 2: https://github.com/plotly/plotly.py/issues/801
     dd_df['duration'] = dd_df['duration'] + pd.to_datetime('1970/01/01')
 
-    graph = px.box(data_frame=dd_df, x="date",
-                   y="duration", title="Duration of Past 20 Games")
+    graph = px.box(data_frame=dd_df,
+                   x="date",
+                   y="duration",
+                   title="Duration of Past 20 Games")
+
     # Force format to ignore the workaround added
     graph.update_yaxes(tickformat="%H:%M:%S")
     graph_html = graph.to_html(full_html=False)
@@ -108,7 +111,9 @@ def graphs_gamemodes_dist(player_data: dict) -> str:
 
     game_mode_df = pd.DataFrame({'Game Mode': game_modes_count.keys(),
                                  'Count': game_modes_count.values()})
-    pie_graph = px.pie(data_frame=game_mode_df, values='Count', names="Game Mode",
+    pie_graph = px.pie(data_frame=game_mode_df,
+                       values='Count',
+                       names="Game Mode",
                        title="Game Mode Distribution")
     graph_html = pie_graph.to_html(full_html=False)
 
@@ -150,7 +155,9 @@ def graphs_surrender_dist(player_data: dict) -> str:
     win_loss_data = pd.DataFrame({'Results': result_counts.keys(),
                                   'Count': result_counts.values()})
 
-    pie_graph = px.pie(data_frame=win_loss_data, values='Count', names="Results",
+    pie_graph = px.pie(data_frame=win_loss_data,
+                       values='Count',
+                       names="Results",
                        title="Win/Surrender/Loss Distribution",
                        color_discrete_sequence=[
                            "green", "purple", "blue", "red"],
